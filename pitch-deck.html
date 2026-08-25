@@ -118,18 +118,15 @@
   </section>
 
   <section class="slide" data-index="2">
-    <div class="eyebrow">2 · Three layers</div>
-    <h1>Separate the platform, security and migration decisions</h1>
+    <div class="eyebrow">2 · Three scenarios</div>
+    <h1>Conservative, base and upside</h1>
     <div class="content">
-      <table class="deck-table">
-        <thead><tr><th>Layer</th><th>What it means for Contoso</th><th>Our position</th></tr></thead>
-        <tbody>
-          <tr><td><strong>1. GitHub Enterprise</strong></td><td>Replace the Azure DevOps developer platform and migrate repositories.</td><td>Test through the pilot.</td></tr>
-          <tr><td><strong>2. Advanced Security</strong></td><td>Add security and dependency scanning for active committers.</td><td>Do not include yet; existing tools overlap.</td></tr>
-          <tr><td><strong>3. Migration and adoption</strong></td><td>Pay the partner, move repositories and recover developer time.</td><td>Measure before scaling.</td></tr>
-        </tbody>
+      <p><strong id="refUsers">500</strong> users · <strong id="refMonths">24</strong> months · maximum stated discounts.</p>
+      <table class="deck-table" id="financeTable">
+        <thead><tr><th>Metric</th><th class="scenario-col-conservative">Conservative</th><th class="scenario-col-base">Base</th><th class="scenario-col-upside">Upside</th></tr></thead>
+        <tbody></tbody>
       </table>
-      <div class="callout">The pilot tests the layers in order: platform value first, then any case for security-tool retirement.</div>
+      <div class="callout" id="financeCallout"></div>
     </div>
   </section>
 
@@ -175,18 +172,6 @@
 
   <section class="slide" data-index="6">
     <div class="eyebrow">Appendix · Q&amp;A backup 1</div>
-    <h1>Financial scenarios at 500 users</h1>
-    <div class="content">
-      <table class="deck-table" id="financeTable">
-        <thead><tr><th>Metric</th><th class="scenario-col-conservative">Conservative</th><th class="scenario-col-base">Base</th><th class="scenario-col-upside">Upside</th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <div class="callout" id="financeCallout"></div>
-    </div>
-  </section>
-
-  <section class="slide" data-index="7">
-    <div class="eyebrow">Appendix · Q&amp;A backup 2</div>
     <h1>Model assumptions</h1>
     <div class="content">
       <table class="deck-table">
@@ -197,8 +182,8 @@
     </div>
   </section>
 
-  <section class="slide" data-index="8">
-    <div class="eyebrow">Appendix · Q&amp;A backup 3</div>
+  <section class="slide" data-index="7">
+    <div class="eyebrow">Appendix · Q&amp;A backup 2</div>
     <h1>Tooling outcomes and evidence to collect</h1>
     <div class="content">
       <table class="deck-table">
@@ -218,7 +203,7 @@
 
 <div class="nav">
   <button id="prevBtn" type="button">&larr; Prev</button>
-  <span id="pageIndicator">1 / 9</span>
+  <span id="pageIndicator">1 / 8</span>
   <button id="nextBtn" type="button">Next &rarr;</button>
 </div>
 
