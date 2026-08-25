@@ -67,9 +67,15 @@
   table.assumptions caption { text-align: left; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
   table.assumptions th, table.assumptions td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
   table.assumptions th { background: var(--panel); font-weight: 600; }
+  table.assumptions input[type="number"] {
+    width: 72px; padding: 3px 6px; border: 1px solid var(--line); border-radius: 4px;
+    font-size: 0.85rem; font-family: inherit;
+  }
   .tag { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 0.72rem; font-weight: 600; }
   .tag-fact { background: #e4ede6; color: #1f5c3f; }
   .tag-assumption { background: #f3e8d8; color: #8a5a1c; }
+  .tag-researched { background: #e3e9f3; color: #29456e; }
+  .editable-hint { font-size: 0.72rem; color: var(--muted); display: block; margin-top: 2px; }
 
   .notes { font-size: 0.82rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; margin-top: 8px; }
   .notes ul { margin: 6px 0 0; padding-left: 18px; }
@@ -78,7 +84,7 @@
 <body>
 <header>
   <h1>Contoso — GitHub Enterprise investment calculator</h1>
-  <p>Adjust employee count and time horizon to see the financial position across the conservative, base and upside scenarios in real time.</p>
+  <p>Adjust employee count and time horizon to see the financial position across the conservative, base and upside scenarios in real time. Migration effort and engineer time saved are editable per scenario in the table below.</p>
 </header>
 
 <main>
@@ -95,7 +101,7 @@
 
   <div class="chart-wrap">
     <h2>Cumulative financial position versus Azure DevOps baseline</h2>
-    <p class="caption">Migration cost applied up front; productivity/consolidation value accrues month by month. A rising line above zero indicates the case has paid back. Even where the upside scenario's <em>annual</em> run-rate turns marginally positive, the large one-off migration cost means full payback is not reached within this 5-year view — see the cards below.</p>
+    <p class="caption">Migration cost applied up front; productivity value accrues monthly from day one; tool-retirement saving accrues only after each scenario's transition month (see table below). A rising line above zero indicates the case has paid back.</p>
     <canvas id="chart" width="960" height="340"></canvas>
     <div class="legend">
       <span><i class="swatch" style="background:var(--conservative)"></i>Conservative</span>
@@ -108,7 +114,7 @@
   <div class="cards" id="cards"></div>
 
   <table class="assumptions">
-    <caption>Model inputs — facts (handout) versus assumptions (team, to validate)</caption>
+    <caption>Model inputs — facts (handout), researched placeholders, and editable team assumptions</caption>
     <thead>
       <tr><th>Parameter</th><th>Conservative</th><th>Base</th><th>Upside</th><th>Source</th></tr>
     </thead>
@@ -118,11 +124,12 @@
   <div class="notes">
     <strong>Read before using these figures externally:</strong>
     <ul>
+      <li>All three scenarios now use the handout's maximum discount (30% GHE, 17% GHAS), per Contoso's confirmation that this applies regardless of scenario. Discount is therefore no longer a source of difference between scenarios — migration effort, engineer time saved, and tool retirement are.</li>
       <li>Migration cost is quoted by the partner in euros (€240/hour/person); this tool combines it with dollar licence figures at an illustrative 1:1 rate — confirm the real EUR/USD rate with finance before quoting a combined number.</li>
-      <li>No value is credited here for retiring BlackDuck, SonarQube, Nexus or the in-house Dependabot — Contoso's actual spend on these was not provided, and none is assumed to be decommissioned under this recommendation. See <code>ROI-Model.md</code> for the full treatment of each tool.</li>
-      <li>These figures show why a full, ~3,000-repository migration is not currently recommended: payback is not reached within 5 years in any scenario. The recommendation is a small, bounded pilot instead — see <code>pitch-deck.html</code> and <code>Neutral-Report.md</code> for the reasoning.</li>
+      <li>Tool-retirement savings (BlackDuck, SonarQube, Nexus) use researched, non-Contoso-specific industry-typical pricing, not Contoso's actual spend — see <code>Quant-Report.md</code> for sources. Confirm real figures before relying on them externally.</li>
+      <li>GitHub tends to port Advanced-Security-equivalent capability back into Azure DevOps within roughly 6 months of release. This is a real risk to the Base/Upside retirement case, not reflected as a number here — see <code>Sceptic-Report.md</code>.</li>
       <li>GitHub Copilot is excluded from every figure in this tool, per the challenge's boundary condition.</li>
-      <li>These figures are a planning model, not a quotation. All discount and productivity-value assumptions require sign-off from Contoso before use in a final business case — see <code>Sceptic-Report.md</code>, <code>Advocate-Report.md</code> and <code>Quant-Report.md</code> for how each was arrived at.</li>
+      <li>These figures are a planning model, not a quotation. See <code>Sceptic-Report.md</code>, <code>Advocate-Report.md</code>, <code>Neutral-Report.md</code> and <code>Quant-Report.md</code> for how each editable default was arrived at.</li>
     </ul>
   </div>
 </main>
@@ -133,13 +140,13 @@
 const {
   FACTS,
   SCENARIOS,
+  INDUSTRY_PLACEHOLDERS,
   LOADED_HOURLY_RATE_USD,
-  adoAnnualCost,
-  githubAnnualCost,
   incrementalAnnualCost,
   valuePerCommitterMonth,
   productivityValueAnnual,
   migrationCostUsd,
+  toolRetirementAnnualSaving,
   netAnnualPosition,
   cumulativePosition,
   paybackMonth,
@@ -148,6 +155,18 @@ const {
 
 const SCENARIO_KEYS = ['conservative', 'base', 'upside'];
 const COLOURS = { conservative: '#b5651d', base: '#1c3d5a', upside: '#1f7a5c' };
+const TOOL_LABELS = { blackDuck: 'BlackDuck', sonarQube: 'SonarQube', nexus: 'Nexus' };
+
+// Editable working copy of the two user-adjustable parameters per scenario.
+// SCENARIOS itself stays frozen (the defaults); this is what the UI reads
+// and writes, so nothing here mutates the model's own definitions.
+const overrides = {};
+for (const key of SCENARIO_KEYS) {
+  overrides[key] = {
+    hoursPerRepo: SCENARIOS[key].migrationHoursPerRepo,
+    minutesSaved: SCENARIOS[key].minutesSavedPerCommitterMonth,
+  };
+}
 
 const employeesInput = document.getElementById('employees');
 const monthsInput = document.getElementById('months');
@@ -158,32 +177,79 @@ const ctx = canvas.getContext('2d');
 const cardsEl = document.getElementById('cards');
 const assumptionsBody = document.getElementById('assumptionsBody');
 
+function describeToolsRetired(scenarioKey) {
+  const s = SCENARIOS[scenarioKey];
+  if (s.toolsRetired.length === 0) return 'None — all kept running alongside GitHub';
+  const names = s.toolsRetired.map(t => TOOL_LABELS[t]).join(', ');
+  return `${names} (after month ${s.retirementTransitionMonths})`;
+}
+
 function buildAssumptionsTable() {
-  const rows = [
-    ['GHE discount applied', s => `${Math.round(s.gheDiscount * 100)}%`, 'assumption'],
-    ['GHAS discount applied', s => `${Math.round(s.ghasDiscount * 100)}%`, 'assumption'],
-    ['Migration effort (hours/repo)', s => s.migrationHoursPerRepo.toFixed(2), 'assumption'],
-    ['Engineer time saved per active committer', s => `${s.minutesSavedPerCommitterMonth} min/month`, 'assumption'],
-  ];
-  assumptionsBody.innerHTML = rows.map(([label, get, kind]) => {
-    const tagClass = kind === 'fact' ? 'tag-fact' : 'tag-assumption';
-    const tagText = kind === 'fact' ? 'Fact' : 'Assumption';
-    return `<tr><td>${label} <span class="tag ${tagClass}">${tagText}</span></td>` +
-      SCENARIO_KEYS.map(k => `<td>${get(SCENARIOS[k])}</td>`).join('') +
-      `<td>${kind === 'fact' ? 'Handout' : 'Team estimate — validate'}</td></tr>`;
-  }).join('');
-  assumptionsBody.innerHTML += `<tr><td>→ implied value per active committer <span class="tag tag-assumption">Derived</span></td>` +
-    SCENARIO_KEYS.map(k => `<td>$${valuePerCommitterMonth(k)}/month</td>`).join('') +
+  assumptionsBody.innerHTML = '';
+
+  // Fact row: discount, now identical across all three scenarios.
+  assumptionsBody.innerHTML += `<tr><td>GHE / GHAS discount applied <span class="tag tag-fact">Fact</span></td>` +
+    `<td colspan="3">${Math.round(FACTS.maxGheDiscount * 100)}% / ${Math.round(FACTS.maxGhasDiscount * 100)}% (handout maximum, applies to all scenarios per Contoso)</td>` +
+    `<td>Handout, confirmed</td></tr>`;
+
+  // Editable row: migration effort (hours/repo).
+  assumptionsBody.innerHTML += `<tr><td>Migration effort (hours/repo) <span class="tag tag-assumption">Assumption</span><span class="editable-hint">Editable</span></td>` +
+    SCENARIO_KEYS.map(k => `<td><input type="number" min="0" step="0.25" data-field="hoursPerRepo" data-scenario="${k}" value="${overrides[k].hoursPerRepo}" /></td>`).join('') +
+    `<td>Team estimate, researched range — validate with partner</td></tr>`;
+
+  // Editable row: engineer time saved (minutes/committer/month).
+  assumptionsBody.innerHTML += `<tr><td>Engineer time saved per active committer (min/month) <span class="tag tag-assumption">Assumption</span><span class="editable-hint">Editable</span></td>` +
+    SCENARIO_KEYS.map(k => `<td><input type="number" min="0" step="5" data-field="minutesSaved" data-scenario="${k}" value="${overrides[k].minutesSaved}" /></td>`).join('') +
+    `<td>Team estimate, researched range — validate with Contoso</td></tr>`;
+
+  // Derived row: dollar value implied by the (possibly edited) minutes above.
+  assumptionsBody.innerHTML += `<tr id="derivedValueRow"><td>→ implied value per active committer <span class="tag tag-assumption">Derived</span></td>` +
+    SCENARIO_KEYS.map(k => `<td id="derivedValue-${k}"></td>`).join('') +
     `<td>Minutes × $${LOADED_HOURLY_RATE_USD}/hour placeholder rate</td></tr>`;
-  assumptionsBody.innerHTML += `<tr><td>GHE / GHAS list price <span class="tag tag-fact">Fact</span></td>` +
-    `<td colspan="3">$${FACTS.gheListPrice}/user/month · $${FACTS.ghasListPrice}/user/month, ${Math.round(FACTS.activeCommitterRatio * 100)}% active committers</td>` +
-    `<td>Handout</td></tr>`;
+
+  // Informational rows: tool retirement (not editable — see pitch-deck.html Slide 4 for the reasoning).
+  assumptionsBody.innerHTML += `<tr><td>Tools retired <span class="tag tag-assumption">Assumption</span></td>` +
+    SCENARIO_KEYS.map(k => `<td>${describeToolsRetired(k)}</td>`).join('') +
+    `<td>Team estimate — see ROI-Model.md</td></tr>`;
+  assumptionsBody.innerHTML += `<tr id="toolSavingRow"><td>→ tool retirement saving (annual, once retired) <span class="tag tag-researched">Researched</span></td>` +
+    SCENARIO_KEYS.map(k => `<td id="toolSaving-${k}"></td>`).join('') +
+    `<td>Industry-typical pricing, not Contoso's cost</td></tr>`;
+
+  // Remaining fact rows.
+  assumptionsBody.innerHTML += `<tr><td>GHE / GHAS list price &amp; active committers <span class="tag tag-fact">Fact</span></td>` +
+    `<td colspan="3">$${FACTS.gheListPrice} · $${FACTS.ghasListPrice} /user/month, ${Math.round(FACTS.activeCommitterRatio * 100)}% active</td><td>Handout</td></tr>`;
   assumptionsBody.innerHTML += `<tr><td>ADO list price &amp; current discount <span class="tag tag-fact">Fact</span></td>` +
-    `<td colspan="3">$${FACTS.adoListPrice}/user/month, ${Math.round(FACTS.adoCurrentDiscount * 100)}% discount</td>` +
-    `<td>Handout</td></tr>`;
-  assumptionsBody.innerHTML += `<tr><td>Private repositories to migrate <span class="tag tag-fact">Fact</span></td>` +
-    `<td colspan="3">${FACTS.repoCount.toLocaleString('en-GB')}, at €${FACTS.partnerRateEurPerHour}/hour/person</td>` +
-    `<td>Handout</td></tr>`;
+    `<td colspan="3">$${FACTS.adoListPrice}/user/month, ${Math.round(FACTS.adoCurrentDiscount * 100)}%</td><td>Handout</td></tr>`;
+  assumptionsBody.innerHTML += `<tr><td>Repositories &amp; partner rate <span class="tag tag-fact">Fact</span></td>` +
+    `<td colspan="3">${FACTS.repoCount.toLocaleString('en-GB')} repos, €${FACTS.partnerRateEurPerHour}/hour/person</td><td>Handout</td></tr>`;
+  assumptionsBody.innerHTML += `<tr><td>Researched tool pricing (BlackDuck / SonarQube / Nexus) <span class="tag tag-researched">Researched</span></td>` +
+    `<td colspan="3">${formatUsd(INDUSTRY_PLACEHOLDERS.blackDuckAnnualUsd)}/year flat · ${formatUsd(INDUSTRY_PLACEHOLDERS.sonarQubeAnnualUsd)}/year flat · ${formatUsd(INDUSTRY_PLACEHOLDERS.nexusAnnualPerCommitterUsd)}/committer/year</td>` +
+    `<td>Public pricing research, not Contoso's cost</td></tr>`;
+
+  // Wire up the editable inputs.
+  assumptionsBody.querySelectorAll('input[type="number"]').forEach((input) => {
+    input.addEventListener('input', () => {
+      const scenario = input.dataset.scenario;
+      const field = input.dataset.field;
+      const value = Number(input.value);
+      if (Number.isFinite(value) && value >= 0) {
+        overrides[scenario][field] = value;
+        updateDerivedRows();
+        render();
+      }
+    });
+  });
+
+  updateDerivedRows();
+}
+
+function updateDerivedRows() {
+  for (const key of SCENARIO_KEYS) {
+    document.getElementById(`derivedValue-${key}`).textContent =
+      `$${valuePerCommitterMonth(key, overrides[key].minutesSaved).toFixed(0)}/month`;
+    document.getElementById(`toolSaving-${key}`).textContent =
+      formatUsd(toolRetirementAnnualSaving(employeesInput ? Number(employeesInput.value) : 500, key));
+  }
 }
 
 function drawChart(users, months) {
@@ -205,7 +271,10 @@ function drawChart(users, months) {
   for (const key of SCENARIO_KEYS) {
     const points = [];
     for (let m = 0; m <= months; m += 1) {
-      const v = cumulativePosition(users, key, m);
+      const v = cumulativePosition(users, key, m, {
+        minutesSavedPerCommitterMonth: overrides[key].minutesSaved,
+        hoursPerRepo: overrides[key].hoursPerRepo,
+      });
       points.push(v);
       if (v < minY) minY = v;
       if (v > maxY) maxY = v;
@@ -274,23 +343,25 @@ function drawChart(users, months) {
 function renderCards(users, months) {
   cardsEl.innerHTML = SCENARIO_KEYS.map((key) => {
     const s = SCENARIOS[key];
+    const ov = { minutesSavedPerCommitterMonth: overrides[key].minutesSaved, hoursPerRepo: overrides[key].hoursPerRepo };
     const incremental = incrementalAnnualCost(users, key);
-    const value = productivityValueAnnual(users, key);
-    const net = netAnnualPosition(users, key);
-    const migration = migrationCostUsd(key);
-    const cumulative = cumulativePosition(users, key, months);
-    const payback = paybackMonth(users, key, 600);
-    const paybackYears = payback === null ? null : (payback / 12).toFixed(0);
+    const value = productivityValueAnnual(users, key, overrides[key].minutesSaved);
+    const toolSaving = toolRetirementAnnualSaving(users, key);
+    const net = value + toolSaving - incremental;
+    const migration = migrationCostUsd(key, FACTS.repoCount, overrides[key].hoursPerRepo);
+    const cumulative = cumulativePosition(users, key, months, ov);
+    const payback = paybackMonth(users, key, 600, ov);
+    const paybackYears = payback === null ? null : (payback / 12).toFixed(1);
     const paybackText = payback === null
       ? 'Not reached within 50 years — quantified value does not offset cost'
-      : `Month ${payback} (~${paybackYears} years) — well beyond any standard planning horizon`;
+      : `Month ${payback} (~${paybackYears} years)`;
     return `
       <div class="card" style="border-top:3px solid ${COLOURS[key]}">
         <h3>${s.label}</h3>
         <dl>
           <dt>Incremental annual licence cost vs ADO</dt><dd>${formatUsd(incremental)}</dd>
-          <dt>Productivity/consolidation value (annual)</dt><dd>${formatUsd(value)}</dd>
-          <dt>Net annual position</dt><dd>${formatUsd(net)}</dd>
+          <dt>Productivity value (annual)</dt><dd>${formatUsd(value)}</dd>
+          <dt>Tool retirement saving (annual, once active)</dt><dd>${formatUsd(toolSaving)}</dd>
           <dt>One-off migration cost</dt><dd>${formatUsd(migration)}</dd>
           <dt>Cumulative position at month ${months}</dt><dd>${formatUsd(cumulative)}</dd>
         </dl>
@@ -306,6 +377,7 @@ function render() {
   monthsValue.textContent = months;
   drawChart(users, months);
   renderCards(users, months);
+  updateDerivedRows();
 }
 
 employeesInput.addEventListener('input', render);

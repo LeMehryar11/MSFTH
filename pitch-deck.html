@@ -73,6 +73,7 @@
     margin: 8px 0 16px;
   }
   .tag { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; background: #f3e8d8; color: #8a5a1c; margin-left: 6px; }
+  .tag-researched { background: #e3e9f3; color: #29456e; }
 
   .nav {
     position: fixed; bottom: 18px; right: 24px; display: flex; gap: 8px; align-items: center;
@@ -104,19 +105,19 @@
 
   <section class="slide" data-index="1">
     <div class="eyebrow">1 · Recommendation</div>
-    <h1>Run a small, bounded pilot — do not commit to a full migration yet</h1>
+    <h1>Run a bounded pilot to find out which scenario Contoso is actually in</h1>
     <div class="content">
-      <p><strong>On the numbers modelled here, none of the three scenarios pay back a full ~3,000-repository migration within 5 years — not even the upside scenario.</strong> We are therefore not recommending Contoso commit budget for a full-scope migration today.</p>
-      <div class="callout">What we <em>are</em> recommending: a small, tightly scoped pilot — roughly 100 users and 300 repositories (10% of the estate), GitHub Enterprise only, no Advanced Security. Its cost is a small, bounded fraction of the full migration cost (see Slide 5), and its purpose is to replace this model's assumptions with Contoso's own real figures before any larger commitment is considered.</div>
-      <p>Advanced Security is not recommended at any scale yet: Contoso's existing BlackDuck, SonarQube and in-house Dependabot equivalent already cover this need (see Slide 4). A pilot of Advanced Security, if run at all, should happen only after the GitHub Enterprise pilot, on a small set of the highest-risk repositories, measured against that existing baseline.</p>
+      <p>With discount now fixed at the handout's maximum in every scenario (per Contoso's confirmation), the financial case no longer hinges on negotiation — it hinges entirely on <strong>execution</strong>: how efficiently the migration itself is run, how much developer time is genuinely saved, and whether Contoso actually retires BlackDuck, SonarQube and Nexus. Those three factors alone span a payback range from <strong>never</strong> (conservative) to <strong>about 17 months</strong> (upside) at 500 users.</p>
+      <div class="callout">That is too wide a range to commit the full ~3,000-repository budget against. We recommend a small, bounded pilot — roughly 100 users and 300 repositories (10% of the estate), GitHub Enterprise only, no Advanced Security — specifically to measure real migration effort and real developer time saved, before deciding at what scope to proceed.</div>
+      <p>Advanced Security is not recommended at any scale yet. Contoso's existing BlackDuck, SonarQube and in-house Dependabot equivalent already cover this need, and GitHub has a track record of porting Advanced-Security-equivalent capability back into Azure DevOps within roughly 6 months of release (see Slide 4) — a further reason not to retire proven tools in a hurry.</p>
     </div>
   </section>
 
   <section class="slide" data-index="2">
     <div class="eyebrow">2 · Financial case</div>
-    <h1>Base, conservative and upside scenarios</h1>
+    <h1>Conservative, base and upside scenarios</h1>
     <div class="content">
-      <p>Illustrated at <strong id="refUsers">750</strong> users over <strong id="refMonths">24</strong> months — the midpoint of Contoso's 500–1,000 user range, no final commitment implied. Full sensitivity is explorable live in <code>calculator.html</code>; the reasoning behind each assumption is in <code>Sceptic-Report.md</code>, <code>Advocate-Report.md</code>, <code>Neutral-Report.md</code> and <code>Quant-Report.md</code>.</p>
+      <p>Illustrated at <strong id="refUsers">500</strong> users over <strong id="refMonths">24</strong> months — the lower end of Contoso's 500–1,000 range, matching the handout's own worked example. Full sensitivity, with every field editable, is in <code>calculator.html</code>; the reasoning behind each figure is in <code>Sceptic-Report.md</code>, <code>Advocate-Report.md</code>, <code>Neutral-Report.md</code> and <code>Quant-Report.md</code>.</p>
       <table class="deck-table" id="financeTable">
         <thead>
           <tr><th>Metric</th><th class="scenario-col-conservative">Conservative</th><th class="scenario-col-base">Base</th><th class="scenario-col-upside">Upside</th></tr>
@@ -131,9 +132,9 @@
     <div class="eyebrow">3 · Cost response</div>
     <h1>"This subscription is too expensive"</h1>
     <div class="content">
-      <p><strong>Yes — and the model agrees with you.</strong> GitHub Enterprise ($21/user/month) plus Advanced Security ($49/user/month) is structurally more expensive per seat than Azure DevOps ($6/user/month), at every discount tier on offer. On our own numbers, a full migration does not pay back within 5 years in any scenario we modelled.</p>
+      <p><strong>It depends entirely on execution, not on negotiation.</strong> GitHub Enterprise plus Advanced Security costs materially more per seat than Azure DevOps even at the maximum available discount — that part is fixed. What is not fixed is how efficiently the migration is executed, how much developer time is genuinely saved, and whether existing tools are actually retired. Get those right and the upside scenario pays back in under a year and a half; get them wrong (as in the conservative scenario) and it never pays back.</p>
       <p>That is exactly why we are not recommending a full commitment today. We are recommending a small, bounded pilot (<span id="pilotCostInline"></span>, see Slide 5) — a fraction of the <span id="fullCostRangeInline"></span> a full migration would cost under these same assumptions.</p>
-      <div class="callout">If the pilot's real numbers still do not support a positive case, the right decision is to stop there having spent a bounded, known amount — not to have committed to the full programme on assumptions alone.</div>
+      <div class="callout">The pilot's whole purpose is to find out, cheaply, which of these scenarios Contoso is really facing — before betting the full migration budget on an assumption.</div>
     </div>
   </section>
 
@@ -141,17 +142,12 @@
     <div class="eyebrow">4 · Existing tooling</div>
     <h1>What happens to Nexus, BlackDuck and SonarQube</h1>
     <div class="content">
-      <p>None of Contoso's existing tooling investment is assumed to be retired under this recommendation. No monetary credit is claimed anywhere in this model for retiring any of them, because their current licence spend was not provided in the handout.</p>
       <table class="deck-table">
-        <thead><tr><th>Tool</th><th>Under this recommendation</th><th>Why</th></tr></thead>
-        <tbody>
-          <tr><td>BlackDuck</td><td>Kept, unchanged</td><td>Already covers software composition analysis; this is precisely why Advanced Security is not recommended at scale — paying for both would be duplicate spend.</td></tr>
-          <tr><td>SonarQube</td><td>Kept, unchanged</td><td>Already covers static analysis/code quality; same duplicate-spend reasoning as above.</td></tr>
-          <tr><td>In-house Dependabot equivalent</td><td>Kept, unchanged</td><td>Already meets Contoso's dependency-scanning needs, per the handout.</td></tr>
-          <tr><td>Nexus (artefact hosting)</td><td>Kept, unchanged, for now</td><td>Not in scope of the GHE pilot (Git, Boards, Pipelines only). Its cost and any GitHub Packages consolidation value are both unknown and should be scoped separately if the pilot proceeds well.</td></tr>
-        </tbody>
+        <thead><tr><th>Scenario</th><th>What happens to BlackDuck / SonarQube / Nexus</th><th>Effect</th></tr></thead>
+        <tbody id="toolingScenarioBody"></tbody>
       </table>
-      <div class="callout">If Contoso later retires any of these tools as part of a wider consolidation, add their real licence spend as additional, separately-evidenced upside — do not assume it in this model.</div>
+      <p style="font-size:0.85rem;color:var(--muted)">Tool costs above use researched, industry-typical pricing <span class="tag tag-researched">Researched</span> — not Contoso's actual spend, which was not provided in the handout. Confirm real figures before relying on these externally (see <code>Quant-Report.md</code> for sources).</p>
+      <div class="callout">Risk that cuts across Base and Upside alike: GitHub has a track record of porting Advanced-Security-equivalent features back into Azure DevOps within roughly 6 months of release. If that holds here, the case for retiring proven tools to rely on GHAS weakens — this should be tested directly during the pilot, not assumed.</div>
     </div>
   </section>
 
@@ -164,23 +160,23 @@
         <tbody></tbody>
       </table>
       <ol>
-        <li><strong>Months 0–3 — Pilot.</strong> Migrate Git, Boards and Pipelines for the pilot group only. Confirm the real discount tier actually on offer. No Advanced Security in this phase.</li>
-        <li><strong>Months 3–6 — Measure.</strong> Track real migration hours per repository, real developer time impact, and the real discount tier, against the placeholder assumptions in this model.</li>
-        <li><strong>Month 6 — Decision gate.</strong> Re-run this model with the pilot's real figures. Only then decide whether a wider rollout — and at what scope — has a defensible financial case.</li>
+        <li><strong>Months 0–3 — Pilot.</strong> Migrate Git, Boards and Pipelines for the pilot group only. No Advanced Security in this phase.</li>
+        <li><strong>Months 3–6 — Measure.</strong> Track real migration hours per repository and real developer time impact against the editable planning ranges used in this model.</li>
+        <li><strong>Month 6 — Decision gate.</strong> Re-run this model (<code>calculator.html</code>) with the pilot's real figures. Only then decide whether a wider rollout — and at what scope — has a defensible financial case.</li>
       </ol>
     </div>
   </section>
 
   <section class="slide" data-index="6">
     <div class="eyebrow">6 · Evidence to collect before committing further budget</div>
-    <h1>Six inputs that materially change the numbers</h1>
+    <h1>What still needs to be confirmed</h1>
     <div class="content">
       <ul>
-        <li>A firm user-count commitment — 500 versus 1,000 users roughly doubles total spend.</li>
-        <li>The discount tiers Microsoft actually agrees for GitHub Enterprise and Advanced Security.</li>
-        <li>Contoso's current BlackDuck, SonarQube and Nexus licence spend, to value any tool retirement.</li>
+        <li>A firm user-count commitment — 500 versus 1,000 users still roughly doubles total spend, even with discount now fixed.</li>
+        <li>A real migration-effort estimate per repository from the preferred partner, replacing the 2.5–10 hour/repository planning range used here.</li>
+        <li>Contoso's current BlackDuck, SonarQube and Nexus licence spend, to replace the researched placeholder figures on Slide 4 with real ones.</li>
+        <li>Whether GitHub's Advanced-Security-equivalent features really do reach Azure DevOps within about 6 months — this materially affects whether retiring existing tools is wise.</li>
         <li>A confirmed EUR/USD basis, since licence pricing is quoted in dollars and the partner's migration rate in euros.</li>
-        <li>A real migration-effort estimate per repository from the preferred partner, replacing the planning range used here.</li>
         <li>Whether Contoso will also take Microsoft's Unified Support, and its cost.</li>
       </ul>
     </div>
@@ -192,10 +188,10 @@
     <div class="content">
       <ul>
         <li>Approve the bounded pilot only (<span id="pilotCostInline2"></span>, Slide 5) — GitHub Enterprise, no Advanced Security, for a defined pilot group.</li>
-        <li>Do not approve a full-scope migration or Advanced Security rollout today — the numbers do not currently support it.</li>
-        <li>Nominate an owner to collect the six evidence items above during the pilot, so the model can be re-run with real figures at the month-6 decision gate.</li>
+        <li>Do not approve a full-scope migration or Advanced Security rollout today — the range between scenarios is too wide to commit against untested assumptions.</li>
+        <li>Nominate an owner to collect the evidence on Slide 6 during the pilot, so the model can be re-run with real figures at the month-6 decision gate.</li>
       </ul>
-      <div class="callout">This is a recommendation to spend a small, bounded amount to find out whether a larger investment would be justified — not a recommendation to commit to the full programme today.</div>
+      <div class="callout">This is a recommendation to spend a small, bounded amount to find out which scenario is real — not a recommendation to commit to the full programme today.</div>
     </div>
   </section>
 
@@ -225,11 +221,12 @@
 const {
   FACTS,
   SCENARIOS,
+  INDUSTRY_PLACEHOLDERS,
   gheAnnualCost,
   incrementalAnnualCost,
-  valuePerCommitterMonth,
   productivityValueAnnual,
   migrationCostUsd,
+  toolRetirementAnnualSaving,
   netAnnualPosition,
   cumulativePosition,
   paybackMonth,
@@ -237,7 +234,8 @@ const {
 } = ROIModel;
 
 const SCENARIO_KEYS = ['conservative', 'base', 'upside'];
-const REF_USERS = 750; // planning midpoint of the 500–1,000 range; not a commitment
+const TOOL_LABELS = { blackDuck: 'BlackDuck', sonarQube: 'SonarQube', nexus: 'Nexus' };
+const REF_USERS = 500; // the lower end of Contoso's range; matches the handout's own worked example
 const REF_MONTHS = 24;
 
 // Recommended pilot scope (Slide 5): a small, bounded validation step, not
@@ -249,13 +247,13 @@ const PILOT_MONTHS = 6;
 function buildFinanceTable() {
   const rows = [
     ['Incremental annual licence cost vs ADO', key => formatUsd(incrementalAnnualCost(REF_USERS, key))],
-    ['Productivity/consolidation value (annual)', key => formatUsd(productivityValueAnnual(REF_USERS, key))],
-    ['Net annual position', key => formatUsd(netAnnualPosition(REF_USERS, key))],
-    ['One-off migration cost (full ~3,000 repos)', key => formatUsd(migrationCostUsd(key))],
+    ['Productivity value (annual)', key => formatUsd(productivityValueAnnual(REF_USERS, key))],
+    ['Tool retirement saving (annual, once active)', key => formatUsd(toolRetirementAnnualSaving(REF_USERS, key))],
+    ['One-off migration cost', key => formatUsd(migrationCostUsd(key))],
     [`Cumulative position at month ${REF_MONTHS}`, key => formatUsd(cumulativePosition(REF_USERS, key, REF_MONTHS))],
-    ['Payback within 5 years', key => {
-      const m = paybackMonth(REF_USERS, key, 60);
-      return m === null ? 'Not reached' : `Month ${m}`;
+    ['Payback (uncapped horizon)', key => {
+      const m = paybackMonth(REF_USERS, key, 600);
+      return m === null ? 'Not reached' : `Month ${m} (~${(m / 12).toFixed(1)} years)`;
     }],
   ];
   const tbody = document.querySelector('#financeTable tbody');
@@ -264,9 +262,34 @@ function buildFinanceTable() {
   ).join('');
 
   const upsidePayback = paybackMonth(REF_USERS, 'upside', 600);
-  document.getElementById('financeCallout').textContent = upsidePayback === null
-    ? `None of the three scenarios pay back the full migration cost within any reasonable horizon at ${REF_USERS} users.`
-    : `Even the upside scenario's annual run-rate only turns positive by a small margin — full payback of the one-off migration cost is not reached until month ${upsidePayback} (~${Math.round(upsidePayback / 12)} years), far beyond any standard planning horizon. This is why a full-scope migration is not recommended today; see the pilot scope on Slide 5.`;
+  const basePayback = paybackMonth(REF_USERS, 'base', 600);
+  document.getElementById('financeCallout').textContent =
+    `Discount is now fixed at the handout's maximum in every scenario, so it no longer explains this spread. ` +
+    `The gap between "never pays back" (conservative) and payback at month ${upsidePayback} (upside) comes entirely from migration efficiency, ` +
+    `real developer time saved, and whether existing tools are actually retired — all three of which the pilot on Slide 5 is designed to test.`;
+}
+
+function buildToolingScenarioTable() {
+  const rows = SCENARIO_KEYS.map((key) => {
+    const s = SCENARIOS[key];
+    const saving = toolRetirementAnnualSaving(REF_USERS, key);
+    let whatHappens;
+    let effect;
+    if (s.toolsRetired.length === 0) {
+      whatHappens = '<strong>Kept running alongside GitHub</strong> (not cancelled)';
+      effect = 'No savings — GHAS is paid for on top, which is exactly why it is not recommended in this scenario.';
+    } else if (s.toolsRetired.length === 1) {
+      const names = s.toolsRetired.map(t => TOOL_LABELS[t]).join(', ');
+      whatHappens = `Contoso retires <strong>${names}</strong> after a ${s.retirementTransitionMonths}-month transition period`;
+      effect = `Partial saving of ${formatUsd(saving)}/year, delayed until month ${s.retirementTransitionMonths}.`;
+    } else {
+      const names = s.toolsRetired.map(t => TOOL_LABELS[t]).join(', ');
+      whatHappens = `Contoso fully retires ${names}, once confident in GHAS coverage`;
+      effect = `Full saving of ${formatUsd(saving)}/year realised, but not until month ${s.retirementTransitionMonths}.`;
+    }
+    return `<tr><td>${s.label}</td><td>${whatHappens}</td><td>${effect}</td></tr>`;
+  });
+  document.getElementById('toolingScenarioBody').innerHTML = rows.join('');
 }
 
 function buildPilotTable() {
@@ -281,9 +304,9 @@ function buildPilotTable() {
   const fullMigrationHigh = Math.max(...SCENARIO_KEYS.map(k => migrationCostUsd(k)));
 
   const rows = [
-    ['Users', `${PILOT_USERS}`, `${REF_USERS} (planning midpoint)`],
+    ['Users', `${PILOT_USERS}`, `${REF_USERS} (lower end of range)`],
     ['Repositories migrated', `${PILOT_REPOS} (10%)`, `~3,000 (100%)`],
-    ['Advanced Security included', 'No', 'Scenario-dependent'],
+    ['Advanced Security included', 'No', 'Not recommended at any scale yet'],
     ['Migration cost', formatUsd(pilotMigration), formatUsd(fullMigration)],
     [`Licence cost (GHE only, ${PILOT_MONTHS} months)`, formatUsd(pilotLicence), `${formatUsd(fullLicenceAnnual)}/year incremental (GHE+GHAS)`],
     ['Total bounded cost', formatUsd(pilotTotal), 'Not recommended at this time'],
@@ -292,8 +315,6 @@ function buildPilotTable() {
     `<tr><td>${label}</td><td>${pilot}</td><td>${full}</td></tr>`
   ).join('');
 
-  // Fill the same computed figures into the earlier slides' inline references,
-  // so there is exactly one calculation, reused, never re-typed.
   const pilotCostText = formatUsd(pilotTotal);
   document.getElementById('pilotCostInline').textContent = pilotCostText;
   document.getElementById('pilotCostInline2').textContent = pilotCostText;
@@ -303,22 +324,25 @@ function buildPilotTable() {
 
 function buildAssumptionsTable() {
   const rows = [
-    ['GHE discount applied', s => `${Math.round(s.gheDiscount * 100)}%`],
-    ['GHAS discount applied', s => `${Math.round(s.ghasDiscount * 100)}%`],
     ['Migration effort (hours/repo)', s => s.migrationHoursPerRepo.toFixed(2)],
     ['Engineer time saved per active committer', s => `${s.minutesSavedPerCommitterMonth} min/month`],
+    ['Tools retired', s => s.toolsRetired.length === 0 ? 'None' : `${s.toolsRetired.map(t => TOOL_LABELS[t]).join(', ')} (month ${s.retirementTransitionMonths})`],
   ];
   const tbody = document.getElementById('assumptionsBody');
   tbody.innerHTML = rows.map(([label, get]) =>
-    `<tr><td>${label}<span class="tag">Assumption</span></td>${SCENARIO_KEYS.map(k => `<td>${get(SCENARIOS[k])}</td>`).join('')}<td>Team estimate — validate</td></tr>`
-  ).join('') + `<tr><td>GHE / GHAS list price &amp; active committers</td><td colspan="3">$${FACTS.gheListPrice} · $${FACTS.ghasListPrice} /user/month, ${Math.round(FACTS.activeCommitterRatio * 100)}% active</td><td>Handout fact</td></tr>` +
-  `<tr><td>ADO list price &amp; current discount</td><td colspan="3">$${FACTS.adoListPrice}/user/month, ${Math.round(FACTS.adoCurrentDiscount * 100)}%</td><td>Handout fact</td></tr>` +
-  `<tr><td>Repositories &amp; partner rate</td><td colspan="3">${FACTS.repoCount.toLocaleString('en-GB')} repos, €${FACTS.partnerRateEurPerHour}/hour/person</td><td>Handout fact</td></tr>`;
+    `<tr><td>${label}<span class="tag">Assumption</span></td>${SCENARIO_KEYS.map(k => `<td>${get(SCENARIOS[k])}</td>`).join('')}<td>Team estimate — editable in calculator.html</td></tr>`
+  ).join('')
+  + `<tr><td>GHE / GHAS discount applied</td><td colspan="3">${Math.round(FACTS.maxGheDiscount * 100)}% / ${Math.round(FACTS.maxGhasDiscount * 100)}% (maximum, all scenarios)</td><td>Handout, confirmed by Contoso</td></tr>`
+  + `<tr><td>GHE / GHAS list price &amp; active committers</td><td colspan="3">$${FACTS.gheListPrice} · $${FACTS.ghasListPrice} /user/month, ${Math.round(FACTS.activeCommitterRatio * 100)}% active</td><td>Handout fact</td></tr>`
+  + `<tr><td>ADO list price &amp; current discount</td><td colspan="3">$${FACTS.adoListPrice}/user/month, ${Math.round(FACTS.adoCurrentDiscount * 100)}%</td><td>Handout fact</td></tr>`
+  + `<tr><td>Repositories &amp; partner rate</td><td colspan="3">${FACTS.repoCount.toLocaleString('en-GB')} repos, €${FACTS.partnerRateEurPerHour}/hour/person</td><td>Handout fact</td></tr>`
+  + `<tr><td>Tool retirement pricing (BlackDuck / SonarQube / Nexus) <span class="tag tag-researched">Researched</span></td><td colspan="3">${formatUsd(INDUSTRY_PLACEHOLDERS.blackDuckAnnualUsd)}/year · ${formatUsd(INDUSTRY_PLACEHOLDERS.sonarQubeAnnualUsd)}/year · ${formatUsd(INDUSTRY_PLACEHOLDERS.nexusAnnualPerCommitterUsd)}/committer/year</td><td>Public pricing research, not Contoso's cost</td></tr>`;
 }
 
 document.getElementById('refUsers').textContent = REF_USERS;
 document.getElementById('refMonths').textContent = REF_MONTHS;
 buildFinanceTable();
+buildToolingScenarioTable();
 buildPilotTable();
 buildAssumptionsTable();
 

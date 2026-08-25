@@ -4,9 +4,13 @@
 // challenge (Quant's formula specification, implemented once and reused by
 // calculator.html and pitch-deck.html — never re-derived downstream).
 //
-// FACTS come directly from the handout and must not be edited without a new
-// handout figure. SCENARIOS are labelled team assumptions requiring
-// validation with Contoso before being treated as fact (see ROI-Model.md).
+// Three tiers of numbers are used throughout, and kept visually distinct
+// wherever they are displayed:
+//   FACTS                 — from the handout, do not edit without a new figure.
+//   INDUSTRY_PLACEHOLDERS — researched externally (see Quant-Report.md for
+//                           sources), not Contoso-specific, replace once real
+//                           quotes/costs are known.
+//   SCENARIOS             — team assumptions requiring validation with Contoso.
 //
 // Written as a plain script (not an ES module) so it can be loaded with a
 // classic <script src="roi-model.js"> tag straight from the local
@@ -37,42 +41,61 @@ const FX_EUR_TO_USD = 1.0;
 // engineering cost before using the productivity figures externally.
 const LOADED_HOURLY_RATE_USD = 80;
 
-// Scenario assumption sets. Only the upside discounts equal handout facts
-// (the stated maximums). Discounts span the full realistic range: the
-// conservative case assumes no discount has been secured at all (the true
-// floor, since nothing beyond the stated maximums is guaranteed), through
-// to the maximum on offer. Productivity/consolidation value is expressed
-// as minutes of engineer time saved per active committer per month, not
-// as a bare dollar figure, so the claim behind each number is checkable
-// (see Quant-Report.md for the reasoning behind each figure).
+// Researched, non-Contoso-specific placeholder figures for the three
+// existing tools, used only to price the "tool retirement" scenarios below.
+// Sources (see Quant-Report.md for full citations):
+//  - BlackDuck: enterprise contracts commonly reported in the $75k–$150k/year
+//    range for mid-sized teams (flat, not per-seat, reflecting how these
+//    deals are typically structured).
+//  - SonarQube Enterprise Edition: typically $16k–$23k/year for a codebase
+//    around 1M lines of code (flat, scales with code volume, not headcount).
+//  - Nexus Repository Pro (self-hosted): typically $120–$175 per user/year.
+const INDUSTRY_PLACEHOLDERS = Object.freeze({
+  blackDuckAnnualUsd: 100000, // flat, mid-point of the researched range
+  sonarQubeAnnualUsd: 20000, // flat, mid-point of the researched range
+  nexusAnnualPerCommitterUsd: 150, // per active committer, mid-point of the researched range
+});
+
+// Scenario assumption sets. Discounts are now fixed at the handout's stated
+// maximum in all three scenarios, per Contoso's confirmation that maximum
+// discounts apply regardless of scenario — discount is therefore no longer
+// a source of variation between scenarios. What still varies: migration
+// effort, engineer time saved (both editable in calculator.html), and which
+// existing tools are assumed retired, and when (see Neutral-Report.md and
+// Quant-Report.md for the reasoning and sources behind each figure).
 const SCENARIOS = Object.freeze({
   conservative: Object.freeze({
     label: 'Conservative',
-    gheDiscount: 0.00, // no discount secured — a genuine floor, not a guess
-    ghasDiscount: 0.00,
-    migrationHoursPerRepo: 3.0, // limited automation reuse, cautious effort
+    gheDiscount: FACTS.maxGheDiscount,
+    ghasDiscount: FACTS.maxGhasDiscount,
+    migrationHoursPerRepo: 10.0, // worst case: treats the whole estate as large/complex
     minutesSavedPerCommitterMonth: 0, // no credited value: redundant with existing tooling
+    toolsRetired: [], // BlackDuck, SonarQube and Nexus all kept running alongside GitHub
+    retirementTransitionMonths: 0, // not applicable — nothing is retired
   }),
   base: Object.freeze({
     label: 'Base',
-    gheDiscount: 0.15,
-    ghasDiscount: 0.08,
-    migrationHoursPerRepo: 1.5,
-    minutesSavedPerCommitterMonth: 15, // ~2 minutes saved per working day
+    gheDiscount: FACTS.maxGheDiscount,
+    ghasDiscount: FACTS.maxGhasDiscount,
+    migrationHoursPerRepo: 5.0, // typical medium-complexity repository
+    minutesSavedPerCommitterMonth: 150, // ~7 minutes/working day
+    toolsRetired: ['blackDuck'], // the most directly redundant with GHAS's dependency/SCA scanning
+    retirementTransitionMonths: 9, // a transition period before retirement takes effect
   }),
   upside: Object.freeze({
     label: 'Upside',
     gheDiscount: FACTS.maxGheDiscount,
     ghasDiscount: FACTS.maxGhasDiscount,
-    migrationHoursPerRepo: 0.75, // high automation reuse, best-case effort
-    minutesSavedPerCommitterMonth: 45, // ~2 minutes saved per working day, doubled
+    migrationHoursPerRepo: 2.5, // best case: high automation reuse, well-tooled migration
+    minutesSavedPerCommitterMonth: 300, // ~14 minutes/working day
+    toolsRetired: ['blackDuck', 'sonarQube', 'nexus'], // all three, once confident in GHAS coverage
+    retirementTransitionMonths: 12, // full retirement takes at least a year to execute safely
   }),
 });
 
-/** Dollar value per active committer per month implied by a scenario's stated time saving. */
-function valuePerCommitterMonth(scenarioKey) {
-  const s = SCENARIOS[scenarioKey];
-  return (s.minutesSavedPerCommitterMonth / 60) * LOADED_HOURLY_RATE_USD;
+/** Dollar value per active committer per month implied by a given time saving. */
+function valuePerCommitterMonth(scenarioKey, minutesSavedPerCommitterMonth = SCENARIOS[scenarioKey].minutesSavedPerCommitterMonth) {
+  return (minutesSavedPerCommitterMonth / 60) * LOADED_HOURLY_RATE_USD;
 }
 
 /** Current-state annual Azure DevOps licence cost for the given user count. */
@@ -101,43 +124,76 @@ function incrementalAnnualCost(users, scenarioKey) {
   return githubAnnualCost(users, scenarioKey) - adoAnnualCost(users);
 }
 
-/** Annual productivity/consolidation value credited to active committers. */
-function productivityValueAnnual(users, scenarioKey) {
-  return users * FACTS.activeCommitterRatio * valuePerCommitterMonth(scenarioKey) * 12;
+/**
+ * Annual productivity/consolidation value credited to active committers.
+ * Accepts an explicit minutesSavedPerCommitterMonth override so the
+ * calculator's editable field can recompute this without mutating the
+ * frozen SCENARIOS defaults.
+ */
+function productivityValueAnnual(users, scenarioKey, minutesSavedPerCommitterMonth = SCENARIOS[scenarioKey].minutesSavedPerCommitterMonth) {
+  return users * FACTS.activeCommitterRatio * valuePerCommitterMonth(scenarioKey, minutesSavedPerCommitterMonth) * 12;
 }
 
 /**
- * One-off migration cost. Defaults to the full ~3,000-repository estate,
- * but accepts an explicit repository count so the same formula can price
- * a smaller, bounded pilot without duplicating the calculation.
+ * One-off migration cost. Defaults to the full ~3,000-repository estate and
+ * the scenario's own hours-per-repository assumption, but accepts explicit
+ * overrides for both so the same formula can price a smaller pilot, or a
+ * user-edited effort figure in the calculator, without duplicating it.
  */
-function migrationCostUsd(scenarioKey, repoCount = FACTS.repoCount) {
-  const s = SCENARIOS[scenarioKey];
-  const eur = repoCount * s.migrationHoursPerRepo * FACTS.partnerRateEurPerHour;
+function migrationCostUsd(scenarioKey, repoCount = FACTS.repoCount, hoursPerRepo = SCENARIOS[scenarioKey].migrationHoursPerRepo) {
+  const eur = repoCount * hoursPerRepo * FACTS.partnerRateEurPerHour;
   return eur * FX_EUR_TO_USD;
 }
 
-/** Net annual position: productivity value minus incremental licence cost. */
-function netAnnualPosition(users, scenarioKey) {
-  return productivityValueAnnual(users, scenarioKey) - incrementalAnnualCost(users, scenarioKey);
+/** Annual saving from the tools a scenario assumes are retired, once retired. */
+function toolRetirementAnnualSaving(users, scenarioKey) {
+  const s = SCENARIOS[scenarioKey];
+  const activeCommitters = users * FACTS.activeCommitterRatio;
+  let saving = 0;
+  if (s.toolsRetired.includes('blackDuck')) saving += INDUSTRY_PLACEHOLDERS.blackDuckAnnualUsd;
+  if (s.toolsRetired.includes('sonarQube')) saving += INDUSTRY_PLACEHOLDERS.sonarQubeAnnualUsd;
+  if (s.toolsRetired.includes('nexus')) saving += activeCommitters * INDUSTRY_PLACEHOLDERS.nexusAnnualPerCommitterUsd;
+  return saving;
 }
 
 /**
- * Cumulative financial position at a given month, migration cost applied
- * up-front at month zero, net annual position accruing pro-rata thereafter.
+ * Net annual position: productivity value plus (post-transition) tool
+ * retirement saving, minus incremental licence cost. Accepts the same
+ * optional minutes-saved override as productivityValueAnnual.
  */
-function cumulativePosition(users, scenarioKey, months) {
-  const net = netAnnualPosition(users, scenarioKey);
-  return (net * months) / 12 - migrationCostUsd(scenarioKey);
+function netAnnualPosition(users, scenarioKey, minutesSavedPerCommitterMonth) {
+  return productivityValueAnnual(users, scenarioKey, minutesSavedPerCommitterMonth)
+    + toolRetirementAnnualSaving(users, scenarioKey)
+    - incrementalAnnualCost(users, scenarioKey);
+}
+
+/**
+ * Cumulative financial position at a given month. Migration cost is applied
+ * up front at month zero (using the given or default hours-per-repository
+ * figure); productivity value accrues from month one; tool-retirement
+ * saving accrues only from its scenario's transition month onward.
+ */
+function cumulativePosition(users, scenarioKey, months, overrides = {}) {
+  const { minutesSavedPerCommitterMonth, hoursPerRepo } = overrides;
+  const s = SCENARIOS[scenarioKey];
+  const productivity = productivityValueAnnual(users, scenarioKey, minutesSavedPerCommitterMonth);
+  const incremental = incrementalAnnualCost(users, scenarioKey);
+  const migration = migrationCostUsd(scenarioKey, FACTS.repoCount, hoursPerRepo);
+
+  const monthsSinceTransition = Math.max(0, months - s.retirementTransitionMonths);
+  const toolSaving = toolRetirementAnnualSaving(users, scenarioKey) * (monthsSinceTransition / 12);
+
+  const runningPosition = ((productivity - incremental) * months) / 12;
+  return runningPosition + toolSaving - migration;
 }
 
 /**
  * First month at which cumulative position reaches zero or above, within
  * maxMonths. Returns null if payback is not reached in the given horizon.
  */
-function paybackMonth(users, scenarioKey, maxMonths) {
+function paybackMonth(users, scenarioKey, maxMonths, overrides = {}) {
   for (let m = 1; m <= maxMonths; m += 1) {
-    if (cumulativePosition(users, scenarioKey, m) >= 0) return m;
+    if (cumulativePosition(users, scenarioKey, m, overrides) >= 0) return m;
   }
   return null;
 }
@@ -155,6 +211,7 @@ const ROIModel = {
   FACTS,
   FX_EUR_TO_USD,
   LOADED_HOURLY_RATE_USD,
+  INDUSTRY_PLACEHOLDERS,
   SCENARIOS,
   adoAnnualCost,
   gheAnnualCost,
@@ -164,6 +221,7 @@ const ROIModel = {
   valuePerCommitterMonth,
   productivityValueAnnual,
   migrationCostUsd,
+  toolRetirementAnnualSaving,
   netAnnualPosition,
   cumulativePosition,
   paybackMonth,
