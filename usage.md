@@ -37,4 +37,4 @@ Every number shown traces back to either:
 - a **handout fact** (fixed pricing, discount caps, user ratios, repository count), or
 - a **labelled team assumption** (discount level actually negotiated, productivity value, migration effort per repository).
 
-`ROI-Model.md` sets out the exact formulas and the worked example that reproduces the handout's own reference numbers ($234,612/year GitHub cost and $29,880/year Azure DevOps cost at 500 users), so the model can be checked independently of the code.
+`ROI-Model.md` sets out the exact formulas and the worked example that reproduces the handout's own reference numbers ($234,612/year GitHub cost and $29,880/year Azure DevOps cost at 500 users), so the model can be checked independently of the code. `Sceptic-Report.md`, `Advocate-Report.md`, `Neutral-Report.md` and `Quant-Report.md` each explain, in more detail, why that agent's specific numbers were chosen and where they are still uncertain.

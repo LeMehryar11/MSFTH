@@ -2,6 +2,8 @@
 
 Five agents, organised around three balanced viewpoints (rather than a single generic "Analyst"), plus build and delivery roles. This stress-tests the ROI case from opposing angles before it is presented, which directly serves the challenge's win condition: reasoning quality over headline ROI size.
 
+Each agent's own detailed report is in a matching file: `Sceptic-Report.md`, `Advocate-Report.md`, `Neutral-Report.md`, `Quant-Report.md`. The Presenter's output is the calculator and pitch deck themselves, so it has no separate report.
+
 ---
 
 ## 1. Sceptic
