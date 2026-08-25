@@ -4,6 +4,12 @@
   "private": true,
   "description": "Contoso GitHub Enterprise ROI challenge: formula model, interactive calculator and pitch deck.",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
     "test": "node --test"
+  },
+  "devDependencies": {
+    "@openai/sites-vite-plugin": "0.2.0",
+    "vite": "8.0.14"
   }
 }

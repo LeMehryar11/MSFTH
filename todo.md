@@ -16,6 +16,9 @@
 - [x] Fix a cross-file inconsistency: the deck and calculator previously used different reference employee counts (750 vs 500), producing different payback months for the same scenario. Both now use 500 users and agree exactly.
 - [x] Add the GHAS-features-port-to-Azure-DevOps-within-6-months risk to the reasoning throughout.
 - [x] Verify the calculator's and deck's rendered output with headless-DOM (`jsdom`) functional tests instead of screenshots (32 assertions total, all passing).
+- [x] Rebuild the calculator as a responsive parameter-led dashboard, with the repository's handout facts, researched placeholders and scenario assumptions shown before the decision outputs.
+- [x] Add live scenario controls, chart inspection, scenario visibility toggles, reset and JSON scenario export while retaining `roi-model.js` as the sole calculation source.
+- [x] Add a production build, hosted-site configuration and social-preview metadata.
 
 ## Outstanding — requires Contoso input before finalising the business case
 - [ ] Confirm the firm user-count commitment (500 vs. 1,000).

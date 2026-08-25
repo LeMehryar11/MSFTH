@@ -15,16 +15,21 @@
 │                          explanation of why the recommendation is a bounded pilot, not a full migration.
 ├── Quant-Report.md        Quant's explanation of every formula, each derivation, and test coverage.
 ├── roi-model.js           Single source-of-truth calculation module (facts, scenario assumptions,
-│                          and pure functions). Loaded by both calculator.html and pitch-deck.html,
+│                          and pure functions). Loaded by both the dashboard and pitch-deck.html,
 │                          and required directly by roi-model.test.js.
 ├── roi-model.test.js      Node built-in test suite (node --test) covering the three scenarios,
 │                          boundary user counts, and edge cases.
-├── calculator.html        Presenter's interactive ROI calculator for the client — two live sliders
-│                          (employees, months), all three scenarios plotted in real time.
+├── index.html             Presenter's parameter-led ROI dashboard and primary site entry point.
+├── dashboard.css         Responsive dashboard presentation and accessible interaction states.
+├── dashboard.js          Live parameter controls, scenario comparison, chart and JSON export.
+├── calculator.html        Compatibility link that redirects older calculator URLs to the dashboard.
 ├── pitch-deck.html        Presenter's minimal, corporate-styled slide deck (keyboard-navigable,
 │                          print-friendly), computed from the same roi-model.js.
-├── package.json           Marks this as a Node project; `npm test` runs the test suite. No
-│                          third-party dependencies.
+├── public/og.png          Branded social-preview image for the hosted dashboard.
+├── .openai/hosting.json  Sites project configuration.
+├── vite.config.mjs       Vite and Sites build configuration.
+├── package.json           Dashboard build, local preview and model test scripts.
+├── package-lock.json      Locked dashboard build dependencies.
 ├── todo.md                Current outstanding tasks and their status.
 ├── map.md                 This file.
 ├── README.md              Project overview for contributors.

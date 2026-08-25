@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f4efe6" />
+  <meta name="description" content="Interactive parameter-led decision dashboard for the Contoso GitHub Enterprise ROI challenge." />
+  <meta property="og:title" content="Contoso GitHub Enterprise ROI Dashboard" />
+  <meta property="og:description" content="Parameters · Scenarios · Payback" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Contoso GitHub Enterprise ROI Dashboard" />
+  <meta name="twitter:description" content="Parameters · Scenarios · Payback" />
+  <meta name="twitter:image" content="/og.png" />
+  <title>Contoso GitHub Enterprise ROI Dashboard</title>
+  <link rel="stylesheet" href="./dashboard.css" />
+</head>
+<body>
+  <a class="skip-link" href="#decision-view">Skip to decision view</a>
+  <div class="site-shell">
+    <aside class="parameter-rail" aria-label="Model parameters">
+      <div class="brand-block">
+        <p class="eyebrow">CONTOSO · INVESTMENT CASE</p>
+        <h1>ROI control room</h1>
+        <p>A live view of the repository’s own facts, placeholders and scenario assumptions.</p>
+      </div>
+
+      <section class="inventory" aria-labelledby="inventory-title">
+        <div class="section-heading compact">
+          <div>
+            <p class="kicker">Start here</p>
+            <h2 id="inventory-title">Parameter inventory</h2>
+          </div>
+          <span class="live-pill"><i></i> Live</span>
+        </div>
+        <div class="inventory-grid">
+          <div><strong>8</strong><span>handout facts</span></div>
+          <div><strong>5</strong><span>placeholders</span></div>
+          <div><strong>12</strong><span>scenario assumptions</span></div>
+        </div>
+      </section>
+
+      <section class="rail-section" aria-labelledby="live-controls-title">
+        <div class="rail-title-row">
+          <h2 id="live-controls-title">Live decision inputs</h2>
+          <button class="text-button" id="resetButton" type="button">Reset</button>
+        </div>
+        <label class="range-label" for="employees">
+          <span>Employees</span>
+          <output id="employeesValue" for="employees">500</output>
+        </label>
+        <input id="employees" type="range" min="500" max="1000" step="10" value="500" />
+        <div class="range-scale"><span>500</span><span>1,000</span></div>
+
+        <label class="range-label top-gap" for="months">
+          <span>Time horizon</span>
+          <output id="monthsValue" for="months">60 months</output>
+        </label>
+        <input id="months" type="range" min="1" max="60" step="1" value="60" />
+        <div class="range-scale"><span>1 month</span><span>60 months</span></div>
+      </section>
+
+      <section class="rail-section" aria-labelledby="scenario-controls-title">
+        <p class="kicker">Editable team assumptions</p>
+        <h2 id="scenario-controls-title">Scenario levers</h2>
+        <div id="scenarioControls" class="scenario-controls"></div>
+      </section>
+
+      <details class="parameter-details" open>
+        <summary>Fixed handout facts</summary>
+        <dl>
+          <div><dt>Private repositories</dt><dd>≈3,000</dd></div>
+          <div><dt>Active committer ratio</dt><dd>60%</dd></div>
+          <div><dt>Partner rate</dt><dd>€240/hour</dd></div>
+          <div><dt>ADO Basic</dt><dd>$6/user/month</dd></div>
+          <div><dt>ADO current discount</dt><dd>17%</dd></div>
+          <div><dt>GHE list / max discount</dt><dd>$21 / 30%</dd></div>
+          <div><dt>GHAS list / max discount</dt><dd>$49 / 17%</dd></div>
+        </dl>
+      </details>
+
+      <details class="parameter-details">
+        <summary>Researched placeholders</summary>
+        <dl>
+          <div><dt>Loaded engineering rate</dt><dd>$80/hour</dd></div>
+          <div><dt>EUR/USD basis</dt><dd>1:1</dd></div>
+          <div><dt>BlackDuck</dt><dd>$100,000/year</dd></div>
+          <div><dt>SonarQube</dt><dd>$20,000/year</dd></div>
+          <div><dt>Nexus</dt><dd>$150/committer/year</dd></div>
+        </dl>
+      </details>
+
+      <button class="primary-button full-width" id="downloadButton" type="button">Download current scenario</button>
+      <p class="rail-note">Fixed facts are shown, not silently edited. Replace placeholders only when Contoso supplies confirmed figures.</p>
+    </aside>
+
+    <main id="decision-view" class="decision-view">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">GITHUB ENTERPRISE · ROI DASHBOARD</p>
+          <h2>Parameter-led investment decision</h2>
+        </div>
+        <div class="topbar-actions">
+          <span class="source-badge">Model source · roi-model.js</span>
+          <a class="quiet-link" href="./pitch-deck.html">Open executive deck ↗</a>
+        </div>
+      </header>
+
+      <section class="recommendation-panel" aria-labelledby="recommendation-title">
+        <div class="recommendation-copy">
+          <p class="kicker">Team recommendation</p>
+          <h2 id="recommendation-title">Run a bounded pilot before any full-estate commitment.</h2>
+          <p>The commercial discounts are already fixed at their maximum. The decision turns on migration effort, measured time saved and whether existing tools can genuinely be retired.</p>
+        </div>
+        <div class="recommendation-status">
+          <span>PILOT FIRST</span>
+          <strong id="baseStatus">Base case under review</strong>
+          <small id="baseStatusDetail">Calculating the selected horizon…</small>
+        </div>
+      </section>
+
+      <section class="metric-grid" aria-label="Current model outputs" aria-live="polite">
+        <article class="metric-card">
+          <p>Current ADO annual cost</p>
+          <strong id="adoAnnual">—</strong>
+          <span>After the confirmed 17% discount</span>
+        </article>
+        <article class="metric-card">
+          <p>GitHub annual platform cost</p>
+          <strong id="githubAnnual">—</strong>
+          <span>GHE + GHAS at maximum discounts</span>
+        </article>
+        <article class="metric-card">
+          <p>Incremental annual licence cost</p>
+          <strong id="incrementalAnnual">—</strong>
+          <span>Identical across all three scenarios</span>
+        </article>
+        <article class="metric-card accent-card">
+          <p>Base cumulative position</p>
+          <strong id="basePosition">—</strong>
+          <span id="basePositionCaption">At the selected horizon</span>
+        </article>
+      </section>
+
+      <section class="panel chart-panel" aria-labelledby="chart-title">
+        <div class="panel-heading">
+          <div>
+            <p class="kicker">Sensitivity view</p>
+            <h2 id="chart-title">Cumulative position versus the ADO baseline</h2>
+            <p>Migration cost is applied up front. Productivity accrues monthly; tool savings begin only after each transition period.</p>
+          </div>
+          <div id="legend" class="legend" aria-label="Toggle chart scenarios"></div>
+        </div>
+        <div class="chart-frame">
+          <canvas id="roiChart" role="img" aria-label="Line chart of cumulative ROI for the conservative, base and upside scenarios"></canvas>
+        </div>
+        <div class="chart-inspector">
+          <label for="inspectMonth"><strong>Inspect month <output id="inspectMonthValue" for="inspectMonth">60</output></strong></label>
+          <input id="inspectMonth" type="range" min="0" max="60" step="1" value="60" />
+          <div id="chartReadout" class="chart-readout" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="scenario-grid" id="scenarioCards" aria-label="Scenario comparison" aria-live="polite"></section>
+
+      <section class="panel" aria-labelledby="assumption-ledger-title">
+        <div class="panel-heading ledger-heading">
+          <div>
+            <p class="kicker">Parameter traceability</p>
+            <h2 id="assumption-ledger-title">Scenario assumption ledger</h2>
+            <p>The values in the two editable columns are controlled from the parameter rail and feed the shared calculation model.</p>
+          </div>
+          <div class="source-key" aria-label="Source tags">
+            <span class="tag fact">Handout fact</span>
+            <span class="tag researched">Researched placeholder</span>
+            <span class="tag assumption">Team assumption</span>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Scenario</th>
+                <th>Migration hours / repository</th>
+                <th>Minutes saved / active committer / month</th>
+                <th>Tools retired</th>
+                <th>Transition</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody id="assumptionRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="evidence-grid" aria-labelledby="evidence-title">
+        <article class="panel evidence-panel">
+          <p class="kicker">Before budget approval</p>
+          <h2 id="evidence-title">Evidence still required from Contoso</h2>
+          <ul>
+            <li><span>01</span><p><strong>Firm user commitment</strong>Confirm whether the decision basis is 500 or 1,000 users.</p></li>
+            <li><span>02</span><p><strong>Partner estimate</strong>Replace the scenario effort assumptions with a real per-repository estimate.</p></li>
+            <li><span>03</span><p><strong>Actual tool spend</strong>Replace the BlackDuck, SonarQube and Nexus placeholders.</p></li>
+            <li><span>04</span><p><strong>Finance inputs</strong>Confirm the EUR/USD basis and loaded engineering cost.</p></li>
+          </ul>
+        </article>
+        <article class="panel boundary-panel">
+          <p class="kicker">Model boundary</p>
+          <h2>What changes the answer</h2>
+          <div class="boundary-item">
+            <span class="boundary-marker terracotta"></span>
+            <div><strong>Migration efficiency</strong><p>2.5–10.0 partner hours per repository across the existing scenarios.</p></div>
+          </div>
+          <div class="boundary-item">
+            <span class="boundary-marker navy"></span>
+            <div><strong>Measured productivity</strong><p>0–300 minutes saved per active committer each month.</p></div>
+          </div>
+          <div class="boundary-item">
+            <span class="boundary-marker green"></span>
+            <div><strong>Tool retirement</strong><p>No saving is counted until the named tools pass their transition period.</p></div>
+          </div>
+          <p class="boundary-note">All figures exclude GitHub Copilot, in line with the challenge boundary.</p>
+        </article>
+      </section>
+
+      <footer>
+        <p>Planning model, not a quotation. Every displayed figure is tied to a handout fact, a researched placeholder or a labelled team assumption.</p>
+        <a href="./ROI-Model.md">Read the formula specification</a>
+      </footer>
+    </main>
+  </div>
+
+  <script src="./roi-model.js"></script>
+  <script type="module" src="./dashboard.js"></script>
+</body>
+</html>
