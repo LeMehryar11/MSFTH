@@ -16,8 +16,8 @@ Five agents, organised around three balanced viewpoints (rather than a single ge
 **Loop:**
 1. Read the Advocate's latest value claims.
 2. Attack each claim with a specific, named risk or overlap.
-3. Hand a revised conservative-scenario input set to the Coder.
-4. Repeat once new figures come back from the Coder/Neutral until claims are defensible.
+3. Hand a revised conservative-scenario input set to the Quant.
+4. Repeat once new figures come back from the Quant/Neutral until claims are defensible.
 
 ---
 
@@ -32,7 +32,7 @@ Five agents, organised around three balanced viewpoints (rather than a single ge
 **Loop:**
 1. Read the Sceptic's latest objections.
 2. Either defend the claim with a handout-grounded justification, or withdraw/adjust it.
-3. Hand a revised upside-scenario input set to the Coder.
+3. Hand a revised upside-scenario input set to the Quant.
 4. Repeat until the upside case survives Sceptic challenge without unlabelled assumptions.
 
 ---
@@ -50,41 +50,46 @@ Five agents, organised around three balanced viewpoints (rather than a single ge
 1. Pull latest conservative and upside outputs from Sceptic/Advocate.
 2. Check consistency (same cost formula structure, no double-counted value).
 3. Update the base case and the recommendation text.
-4. Send agreed inputs to the Coder for the model; send narrative to the Presenter.
+4. Send agreed inputs to the Quant for calculation; send narrative to the Presenter.
 
 ---
 
-## 4. Coder
-**Description:** Builds and maintains the single source-of-truth ROI/sensitivity model (spreadsheet or script) that all three scenarios run through, so numbers stay comparable and auditable.
+## 4. Quant (Quantitative Analyst)
+**Description:** Turns the Sceptic's, Advocate's, and Neutral's inputs into rigorous, auditable calculations. Owns all formulas and maths, but does not write the client-facing tool — that is the Presenter's job. Produces a single, reusable formula specification that the Presenter's GUI implements directly, so the maths is never re-derived or duplicated downstream.
 
 **Tasks:**
-- Implement the cost model exactly as given in the handout (GHE, GHAS, ADO formulas) as reusable, parameterised functions — not copy-pasted per scenario.
-- Add sensitivity toggles for: user count (500–1,000), discount levels (0 to max), active-committer ratio, migration cost.
-- Produce the model audit output: base licence costs, productivity gains, monetary conversions, for each of the three scenarios.
-- Never invent discount rates beyond those listed; surface a clear input field/comment where the team must confirm real figures.
+- Implement the cost model exactly as given in the handout (GHE, GHAS, ADO formulas) as one parameterised calculation path — not copy-pasted per scenario.
+- Add sensitivity variables for: user count (500–1,000), time horizon in months, discount levels (0 to max), active-committer ratio, migration cost.
+- Produce the model audit output: base licence costs, productivity gains, monetary conversions, and cumulative/break-even figures over time, for each of the three scenarios (conservative, base, upside).
+- Never invent discount rates beyond those listed; surface a clear input where the team must confirm real figures.
+- Hand off the formula specification (inputs, outputs, exact calculation steps) to the Presenter in a form that can be implemented without reinterpretation.
 
 **Loop:**
 1. Receive scenario inputs from Sceptic/Advocate/Neutral.
-2. Run the model, return output figures.
+2. Run the calculations, return output figures for all three scenarios.
 3. Flag any inconsistency or missing input back to Neutral.
 4. Version each run so the team can trace which assumption set produced which number.
+5. Verify the Presenter's implementation of the formulas matches the Quant's own output figures before sign-off.
 
 ---
 
 ## 5. Presenter
-**Description:** Packages the reconciled recommendation into the required five-minute pitch, poster, or slide pack, and prepares Q&A defence.
+**Description:** Packages the reconciled recommendation into the required five-minute pitch, poster, or slide pack, prepares Q&A defence, and builds a lightweight interactive ROI calculator for the client, implementing the Quant's formulas as the tool's single calculation engine.
 
 **Tasks:**
 - Structure the pitch to explicitly answer the four final-pitch questions (recommendation; base/conservative/upside case; evidence to collect; next executive decision).
 - Build the model audit, sensitivity model, cost response, recommendation and executive pitch deliverables in presentable form.
+- Build a minimal, dependency-light interactive HTML ROI calculator for the client: two simultaneously adjustable inputs (number of employees, number of months), with all three scenarios (conservative, base, upside) visualised in real time as either input changes, including the cumulative-cost/break-even view over the chosen time horizon.
+- Implement the calculator strictly on top of the Quant's formula specification, without re-deriving or altering the maths.
 - Prepare rebuttals for likely executive pushback, using the Sceptic's and Neutral's material.
-- Keep the deck concise; the challenge rewards clarity of reasoning, not volume of slides.
+- Keep both the deck and the calculator concise; the challenge rewards clarity of reasoning, not volume of slides or features.
 
 **Loop:**
-1. Pull latest reconciled numbers and narrative from Neutral, and model output from Coder.
-2. Draft/update the pitch and poster.
-3. Run a mock Q&A against the Sceptic's objections.
-4. Revise until the pitch survives a hostile question on every one of the five deliverables.
+1. Pull latest reconciled numbers and narrative from Neutral, and the formula specification from the Quant.
+2. Draft/update the pitch, poster, and the interactive calculator.
+3. Cross-check the calculator's live output against the Quant's reference figures for the same inputs.
+4. Run a mock Q&A against the Sceptic's objections.
+5. Revise until the pitch and calculator survive a hostile question on every one of the five deliverables.
 
 ---
 
@@ -97,6 +102,6 @@ Sceptic  <---->  Advocate
         Neutral (Synthesiser)
           /            \
          v              v
-      Coder          Presenter
+       Quant   ---->  Presenter
 ```
-Sceptic and Advocate iterate directly with each other; Neutral reconciles their output into one consistent case; Coder keeps the numbers auditable; Presenter turns the reconciled case into the final deliverable set.
+Sceptic and Advocate iterate directly with each other; Neutral reconciles their output into one consistent case; the Quant turns that case into audited formulas and figures; the Presenter implements those formulas in the pitch material and the interactive calculator, and turns the reconciled case into the final deliverable set.
