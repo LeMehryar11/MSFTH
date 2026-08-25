@@ -1,0 +1,9 @@
+{
+  "name": "contoso-ghe-roi-challenge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Contoso GitHub Enterprise ROI challenge: formula model, interactive calculator and pitch deck.",
+  "scripts": {
+    "test": "node --test"
+  }
+}

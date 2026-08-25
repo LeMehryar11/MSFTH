@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Contoso — GitHub Enterprise Investment Case</title>
+<style>
+  :root {
+    --ink: #1c2b3a;
+    --muted: #5b6b7a;
+    --line: #d8dee4;
+    --paper: #ffffff;
+    --panel: #f5f7f9;
+    --conservative: #b5651d;
+    --base: #1c3d5a;
+    --upside: #1f7a5c;
+    --accent: #1c3d5a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+    color: var(--ink);
+    background: #e9ecef;
+  }
+  .deck { position: relative; height: 100vh; overflow: hidden; }
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    background: var(--paper);
+    padding: 56px 72px;
+  }
+  .slide.active { display: flex; }
+  .slide .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .slide h1 { font-size: 2rem; margin: 0 0 18px; font-weight: 600; }
+  .slide h2 { font-size: 1.15rem; margin: 22px 0 10px; font-weight: 600; }
+  .slide p { font-size: 1.05rem; line-height: 1.5; margin: 0 0 12px; max-width: 900px; }
+  .slide ul, .slide ol { font-size: 1.02rem; line-height: 1.55; max-width: 880px; margin: 0 0 10px; padding-left: 22px; }
+  .slide .content { flex: 1; overflow: auto; }
+  .slide footer.slide-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid var(--line); padding-top: 12px; margin-top: 16px;
+    font-size: 0.78rem; color: var(--muted);
+  }
+
+  .title-slide { justify-content: center; align-items: flex-start; }
+  .title-slide h1 { font-size: 2.6rem; }
+  .title-slide .subtitle { font-size: 1.2rem; color: var(--muted); margin-bottom: 28px; }
+  .title-slide .meta { font-size: 0.9rem; color: var(--muted); }
+
+  table.deck-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin: 10px 0 16px; }
+  table.deck-table th, table.deck-table td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  table.deck-table th { background: var(--panel); font-weight: 600; }
+  .scenario-col-conservative { border-top: 3px solid var(--conservative); }
+  .scenario-col-base { border-top: 3px solid var(--base); }
+  .scenario-col-upside { border-top: 3px solid var(--upside); }
+
+  .callout {
+    background: var(--panel);
+    border-left: 4px solid var(--accent);
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    max-width: 880px;
+    margin: 8px 0 16px;
+  }
+  .tag { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; background: #f3e8d8; color: #8a5a1c; margin-left: 6px; }
+
+  .nav {
+    position: fixed; bottom: 18px; right: 24px; display: flex; gap: 8px; align-items: center;
+    font-size: 0.85rem; color: var(--muted);
+  }
+  .nav button {
+    border: 1px solid var(--line); background: var(--paper); border-radius: 4px;
+    padding: 6px 12px; cursor: pointer; font-size: 0.85rem;
+  }
+  .nav button:hover { background: var(--panel); }
+
+  @media print {
+    .nav { display: none; }
+    .deck { height: auto; }
+    .slide { position: static; display: flex !important; page-break-after: always; height: 100vh; }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <section class="slide title-slide active" data-index="0">
+    <div class="eyebrow">GitHub Enterprise ROI challenge</div>
+    <h1>Contoso: GitHub Enterprise investment case</h1>
+    <p class="subtitle">A financially reasoned recommendation on migrating from Azure DevOps</p>
+    <p class="meta">Prepared for David Schankwirt and Johannes Starkwind · GitHub Copilot excluded from all figures</p>
+  </section>
+
+  <section class="slide" data-index="1">
+    <div class="eyebrow">1 · Recommendation</div>
+    <h1>Adopt GitHub Enterprise; treat Advanced Security as an evidence-gated add-on</h1>
+    <div class="content">
+      <p>Migrate Git, Boards and Pipelines from Azure DevOps to GitHub Enterprise to consolidate the engineering platform. Do not roll out GitHub Advanced Security across all active committers at this stage.</p>
+      <div class="callout">Contoso already runs BlackDuck, SonarQube and an in-house Dependabot equivalent that meet today's needs. Paying for GitHub Advanced Security across 60% of users on top of that is not currently justified by the numbers — see the financial case on the next slide.</div>
+      <p>Instead: pilot Advanced Security on a small, named set of the highest-risk repositories, measure the value it adds beyond the existing tools, and only then decide on wider rollout.</p>
+    </div>
+  </section>
+
+  <section class="slide" data-index="2">
+    <div class="eyebrow">2 · Financial case</div>
+    <h1>Base, conservative and upside scenarios</h1>
+    <div class="content">
+      <p>Illustrated at <strong id="refUsers">750</strong> users over <strong id="refMonths">24</strong> months — the midpoint of Contoso's 500–1,000 user range, no final commitment implied. Full sensitivity is explorable live in <code>calculator.html</code>.</p>
+      <table class="deck-table" id="financeTable">
+        <thead>
+          <tr><th>Metric</th><th class="scenario-col-conservative">Conservative</th><th class="scenario-col-base">Base</th><th class="scenario-col-upside">Upside</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="callout" id="financeCallout"></div>
+    </div>
+  </section>
+
+  <section class="slide" data-index="3">
+    <div class="eyebrow">3 · Cost response</div>
+    <h1>"This subscription is too expensive"</h1>
+    <div class="content">
+      <p><strong>Yes — on licence cost alone, that is correct.</strong> GitHub Enterprise ($21/user/month) plus Advanced Security ($49/user/month) is structurally more expensive per seat than Azure DevOps ($6/user/month), at every discount tier on offer. No realistic scenario recovers that gap through licence cost alone.</p>
+      <p>That is exactly why we are not recommending a blanket like-for-like swap. The recommendation is to pay for the consolidation value GitHub Enterprise genuinely adds, and to treat Advanced Security as optional spend, gated on evidence, rather than a default line item.</p>
+      <div class="callout">This keeps incremental spend proportionate to demonstrated value, rather than committing to the full cost on assumptions alone.</div>
+    </div>
+  </section>
+
+  <section class="slide" data-index="4">
+    <div class="eyebrow">4 · Scope, effort and timeline</div>
+    <h1>A phased path to a evidence-based decision</h1>
+    <div class="content">
+      <ol>
+        <li><strong>Months 0–3 — Pilot.</strong> Migrate Git, Boards and Pipelines for a defined pilot group on GitHub Enterprise. Confirm the real user count and negotiated discount tier. No Advanced Security rollout in this phase.</li>
+        <li><strong>Months 3–9 — Platform migration.</strong> Migrate the remaining approximately 3,000 private repositories via the preferred partner (≈€240/hour/person). Track actual effort against the 0.5–2.0 hour/repository planning range used in this model.</li>
+        <li><strong>Months 9–15 — Security pilot.</strong> Trial Advanced Security on a small, named set of the highest-risk repositories only. Measure realised value against the BlackDuck/SonarQube baseline.</li>
+        <li><strong>Month 15 — Review.</strong> Re-run this financial model with real data before committing to Advanced Security at scale.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="slide" data-index="5">
+    <div class="eyebrow">5 · Evidence to collect before committing budget</div>
+    <h1>Six inputs that materially change the numbers</h1>
+    <div class="content">
+      <ul>
+        <li>A firm user-count commitment — 500 versus 1,000 users roughly doubles total spend.</li>
+        <li>The discount tiers Microsoft actually agrees for GitHub Enterprise and Advanced Security.</li>
+        <li>Contoso's current BlackDuck, SonarQube and Nexus licence spend, to value any tool retirement.</li>
+        <li>A confirmed EUR/USD basis, since licence pricing is quoted in dollars and the partner's migration rate in euros.</li>
+        <li>A real migration-effort estimate per repository from the preferred partner, replacing the planning range used here.</li>
+        <li>Whether Contoso will also take Microsoft's Unified Support, and its cost.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="slide" data-index="6">
+    <div class="eyebrow">6 · Decision requested</div>
+    <h1>What we are asking the executive team to approve today</h1>
+    <div class="content">
+      <ul>
+        <li>Approve a bounded Phase 1 pilot: GitHub Enterprise only, no Advanced Security, for a defined pilot group.</li>
+        <li>Defer any Advanced Security commitment until the Phase 3 pilot produces evidence.</li>
+        <li>Nominate an owner to collect the six evidence items above within 30 days, so the model can be re-run with real figures.</li>
+      </ul>
+      <div class="callout">This is a recommendation to proceed carefully and cheaply toward a better-informed decision — not a recommendation to commit to the full programme today.</div>
+    </div>
+  </section>
+
+  <section class="slide" data-index="7">
+    <div class="eyebrow">Appendix · Q&amp;A backup</div>
+    <h1>Model assumptions — facts versus team estimates</h1>
+    <div class="content">
+      <table class="deck-table">
+        <thead><tr><th>Parameter</th><th>Conservative</th><th>Base</th><th>Upside</th><th>Source</th></tr></thead>
+        <tbody id="assumptionsBody"></tbody>
+      </table>
+      <p style="font-size:0.85rem;color:var(--muted)">GitHub Copilot is excluded from every figure above, per the challenge's boundary condition. Migration cost (quoted in euros) is combined with dollar licence figures at an illustrative 1:1 rate — confirm the real rate with finance before quoting a combined number externally.</p>
+    </div>
+  </section>
+
+</div>
+
+<div class="nav">
+  <button id="prevBtn" type="button">&larr; Prev</button>
+  <span id="pageIndicator">1 / 8</span>
+  <button id="nextBtn" type="button">Next &rarr;</button>
+</div>
+
+<script src="roi-model.js"></script>
+<script>
+(function () {
+const {
+  FACTS,
+  SCENARIOS,
+  githubAnnualCost,
+  incrementalAnnualCost,
+  productivityValueAnnual,
+  migrationCostUsd,
+  netAnnualPosition,
+  cumulativePosition,
+  paybackMonth,
+  formatUsd,
+} = ROIModel;
+
+const SCENARIO_KEYS = ['conservative', 'base', 'upside'];
+const REF_USERS = 750; // planning midpoint of the 500–1,000 range; not a commitment
+const REF_MONTHS = 24;
+
+function buildFinanceTable() {
+  const rows = [
+    ['Incremental annual licence cost vs ADO', key => formatUsd(incrementalAnnualCost(REF_USERS, key))],
+    ['Productivity/consolidation value (annual)', key => formatUsd(productivityValueAnnual(REF_USERS, key))],
+    ['Net annual position', key => formatUsd(netAnnualPosition(REF_USERS, key))],
+    ['One-off migration cost', key => formatUsd(migrationCostUsd(key))],
+    [`Cumulative position at month ${REF_MONTHS}`, key => formatUsd(cumulativePosition(REF_USERS, key, REF_MONTHS))],
+    ['Payback within 5 years', key => {
+      const m = paybackMonth(REF_USERS, key, 60);
+      return m === null ? 'Not reached' : `Month ${m}`;
+    }],
+  ];
+  const tbody = document.querySelector('#financeTable tbody');
+  tbody.innerHTML = rows.map(([label, get]) =>
+    `<tr><td>${label}</td>${SCENARIO_KEYS.map(k => `<td>${get(k)}</td>`).join('')}</tr>`
+  ).join('');
+
+  const allNegative = SCENARIO_KEYS.every(k => netAnnualPosition(REF_USERS, k) < 0);
+  document.getElementById('financeCallout').textContent = allNegative
+    ? `Under these labelled assumptions, none of the three scenarios fully offset the incremental licence cost at ${REF_USERS} users — the upside scenario comes closest. The remaining gap could plausibly be closed by retiring redundant security tooling, which is not counted here because Contoso's current spend on it was not provided.`
+    : 'At least one scenario reaches a positive net annual position under these assumptions.';
+}
+
+function buildAssumptionsTable() {
+  const rows = [
+    ['GHE discount applied', s => `${Math.round(s.gheDiscount * 100)}%`],
+    ['GHAS discount applied', s => `${Math.round(s.ghasDiscount * 100)}%`],
+    ['Migration effort (hours/repo)', s => s.migrationHoursPerRepo.toFixed(1)],
+    ['Productivity/consolidation value ($/active committer/month)', s => `$${s.valuePerCommitterMonth}`],
+  ];
+  const tbody = document.getElementById('assumptionsBody');
+  tbody.innerHTML = rows.map(([label, get]) =>
+    `<tr><td>${label}<span class="tag">Assumption</span></td>${SCENARIO_KEYS.map(k => `<td>${get(SCENARIOS[k])}</td>`).join('')}<td>Team estimate — validate</td></tr>`
+  ).join('') + `<tr><td>GHE / GHAS list price &amp; active committers</td><td colspan="3">$${FACTS.gheListPrice} · $${FACTS.ghasListPrice} /user/month, ${Math.round(FACTS.activeCommitterRatio * 100)}% active</td><td>Handout fact</td></tr>` +
+  `<tr><td>ADO list price &amp; current discount</td><td colspan="3">$${FACTS.adoListPrice}/user/month, ${Math.round(FACTS.adoCurrentDiscount * 100)}%</td><td>Handout fact</td></tr>` +
+  `<tr><td>Repositories &amp; partner rate</td><td colspan="3">${FACTS.repoCount.toLocaleString('en-GB')} repos, €${FACTS.partnerRateEurPerHour}/hour/person</td><td>Handout fact</td></tr>`;
+}
+
+document.getElementById('refUsers').textContent = REF_USERS;
+document.getElementById('refMonths').textContent = REF_MONTHS;
+buildFinanceTable();
+buildAssumptionsTable();
+
+// --- Slide navigation ---
+const slides = Array.from(document.querySelectorAll('.slide'));
+let current = 0;
+const indicator = document.getElementById('pageIndicator');
+
+function show(index) {
+  current = Math.max(0, Math.min(slides.length - 1, index));
+  slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
+  indicator.textContent = `${current + 1} / ${slides.length}`;
+}
+
+document.getElementById('prevBtn').addEventListener('click', () => show(current - 1));
+document.getElementById('nextBtn').addEventListener('click', () => show(current + 1));
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === 'PageDown') show(current + 1);
+  if (e.key === 'ArrowLeft' || e.key === 'PageUp') show(current - 1);
+});
+
+show(0);
+})();
+</script>
+</body>
+</html>
