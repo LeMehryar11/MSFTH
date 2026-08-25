@@ -88,14 +88,14 @@
       <input type="range" id="employees" min="500" max="1000" step="10" value="500" />
     </div>
     <div class="control">
-      <label for="months"><span>Time horizon (months)</span><span id="monthsValue">36</span></label>
-      <input type="range" id="months" min="1" max="36" step="1" value="36" />
+      <label for="months"><span>Time horizon (months)</span><span id="monthsValue">60</span></label>
+      <input type="range" id="months" min="1" max="60" step="1" value="60" />
     </div>
   </div>
 
   <div class="chart-wrap">
     <h2>Cumulative financial position versus Azure DevOps baseline</h2>
-    <p class="caption">Migration cost applied up front; productivity/consolidation value accrues month by month. A rising line above zero indicates the case has paid back.</p>
+    <p class="caption">Migration cost applied up front; productivity/consolidation value accrues month by month. A rising line above zero indicates the case has paid back. Even where the upside scenario's <em>annual</em> run-rate turns marginally positive, the large one-off migration cost means full payback is not reached within this 5-year view — see the cards below.</p>
     <canvas id="chart" width="960" height="340"></canvas>
     <div class="legend">
       <span><i class="swatch" style="background:var(--conservative)"></i>Conservative</span>
@@ -119,9 +119,10 @@
     <strong>Read before using these figures externally:</strong>
     <ul>
       <li>Migration cost is quoted by the partner in euros (€240/hour/person); this tool combines it with dollar licence figures at an illustrative 1:1 rate — confirm the real EUR/USD rate with finance before quoting a combined number.</li>
-      <li>No value is credited here for retiring BlackDuck, SonarQube or the in-house Dependabot — Contoso's actual spend on these was not provided. If any are retired as part of consolidation, their spend should be added as further upside once known.</li>
+      <li>No value is credited here for retiring BlackDuck, SonarQube, Nexus or the in-house Dependabot — Contoso's actual spend on these was not provided, and none is assumed to be decommissioned under this recommendation. See <code>ROI-Model.md</code> for the full treatment of each tool.</li>
+      <li>These figures show why a full, ~3,000-repository migration is not currently recommended: payback is not reached within 5 years in any scenario. The recommendation is a small, bounded pilot instead — see <code>pitch-deck.html</code> and <code>Neutral-Report.md</code> for the reasoning.</li>
       <li>GitHub Copilot is excluded from every figure in this tool, per the challenge's boundary condition.</li>
-      <li>These figures are a planning model, not a quotation. All discount and value-per-committer assumptions require sign-off from Contoso before use in a final business case.</li>
+      <li>These figures are a planning model, not a quotation. All discount and productivity-value assumptions require sign-off from Contoso before use in a final business case — see <code>Sceptic-Report.md</code>, <code>Advocate-Report.md</code> and <code>Quant-Report.md</code> for how each was arrived at.</li>
     </ul>
   </div>
 </main>
@@ -132,9 +133,11 @@
 const {
   FACTS,
   SCENARIOS,
+  LOADED_HOURLY_RATE_USD,
   adoAnnualCost,
   githubAnnualCost,
   incrementalAnnualCost,
+  valuePerCommitterMonth,
   productivityValueAnnual,
   migrationCostUsd,
   netAnnualPosition,
@@ -159,8 +162,8 @@ function buildAssumptionsTable() {
   const rows = [
     ['GHE discount applied', s => `${Math.round(s.gheDiscount * 100)}%`, 'assumption'],
     ['GHAS discount applied', s => `${Math.round(s.ghasDiscount * 100)}%`, 'assumption'],
-    ['Migration effort (hours/repo)', s => s.migrationHoursPerRepo.toFixed(1), 'assumption'],
-    ['Productivity/consolidation value ($/active committer/month)', s => `$${s.valuePerCommitterMonth}`, 'assumption'],
+    ['Migration effort (hours/repo)', s => s.migrationHoursPerRepo.toFixed(2), 'assumption'],
+    ['Engineer time saved per active committer', s => `${s.minutesSavedPerCommitterMonth} min/month`, 'assumption'],
   ];
   assumptionsBody.innerHTML = rows.map(([label, get, kind]) => {
     const tagClass = kind === 'fact' ? 'tag-fact' : 'tag-assumption';
@@ -169,6 +172,9 @@ function buildAssumptionsTable() {
       SCENARIO_KEYS.map(k => `<td>${get(SCENARIOS[k])}</td>`).join('') +
       `<td>${kind === 'fact' ? 'Handout' : 'Team estimate — validate'}</td></tr>`;
   }).join('');
+  assumptionsBody.innerHTML += `<tr><td>→ implied value per active committer <span class="tag tag-assumption">Derived</span></td>` +
+    SCENARIO_KEYS.map(k => `<td>$${valuePerCommitterMonth(k)}/month</td>`).join('') +
+    `<td>Minutes × $${LOADED_HOURLY_RATE_USD}/hour placeholder rate</td></tr>`;
   assumptionsBody.innerHTML += `<tr><td>GHE / GHAS list price <span class="tag tag-fact">Fact</span></td>` +
     `<td colspan="3">$${FACTS.gheListPrice}/user/month · $${FACTS.ghasListPrice}/user/month, ${Math.round(FACTS.activeCommitterRatio * 100)}% active committers</td>` +
     `<td>Handout</td></tr>`;
@@ -274,9 +280,10 @@ function renderCards(users, months) {
     const migration = migrationCostUsd(key);
     const cumulative = cumulativePosition(users, key, months);
     const payback = paybackMonth(users, key, 600);
+    const paybackYears = payback === null ? null : (payback / 12).toFixed(0);
     const paybackText = payback === null
-      ? 'Not reached — quantified value does not offset cost within a plausible horizon'
-      : `Reached at month ${payback}`;
+      ? 'Not reached within 50 years — quantified value does not offset cost'
+      : `Month ${payback} (~${paybackYears} years) — well beyond any standard planning horizon`;
     return `
       <div class="card" style="border-top:3px solid ${COLOURS[key]}">
         <h3>${s.label}</h3>

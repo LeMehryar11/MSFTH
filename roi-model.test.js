@@ -7,11 +7,13 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
   FACTS,
+  SCENARIOS,
   adoAnnualCost,
   gheAnnualCost,
   ghasAnnualCost,
   githubAnnualCost,
   incrementalAnnualCost,
+  valuePerCommitterMonth,
   productivityValueAnnual,
   migrationCostUsd,
   netAnnualPosition,
@@ -90,6 +92,36 @@ test('cumulative position becomes more negative over time when net annual positi
   const at12 = cumulativePosition(users, scenarioKey, 12);
   const at24 = cumulativePosition(users, scenarioKey, 24);
   assert.ok(at24 < at12);
+});
+
+test('conservative scenario assumes no discount has been secured (a genuine floor)', () => {
+  assert.equal(SCENARIOS.conservative.gheDiscount, 0);
+  assert.equal(SCENARIOS.conservative.ghasDiscount, 0);
+  // With zero discount, GitHub cost should equal the undiscounted list price.
+  assert.equal(gheAnnualCost(500, SCENARIOS.conservative.gheDiscount), 500 * FACTS.gheListPrice * 12);
+});
+
+test('productivity value is derived from minutes saved and the loaded hourly rate, not an arbitrary dollar figure', () => {
+  for (const key of ['conservative', 'base', 'upside']) {
+    const s = SCENARIOS[key];
+    const expected = (s.minutesSavedPerCommitterMonth / 60) * 80; // $80/hour placeholder rate
+    assert.equal(valuePerCommitterMonth(key), expected);
+  }
+});
+
+test('migration cost can be scaled to a smaller pilot repository count without duplicating the formula', () => {
+  const fullScope = migrationCostUsd('base');
+  const pilotScope = migrationCostUsd('base', 300); // e.g. a 10% pilot
+  assert.equal(pilotScope, 300 * SCENARIOS.base.migrationHoursPerRepo * FACTS.partnerRateEurPerHour);
+  assert.ok(pilotScope < fullScope);
+});
+
+test('payback is not reached within a 5-year (60-month) planning horizon, in any scenario', () => {
+  for (const users of [500, 750, 1000]) {
+    for (const scenarioKey of ['conservative', 'base', 'upside']) {
+      assert.equal(paybackMonth(users, scenarioKey, 60), null);
+    }
+  }
 });
 
 test('payback month returns null when the horizon is never reached', () => {

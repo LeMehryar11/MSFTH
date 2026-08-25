@@ -31,31 +31,49 @@ const FACTS = Object.freeze({
 // using these combined figures in a final business case.
 const FX_EUR_TO_USD = 1.0;
 
+// Assumed fully-loaded engineering cost, used only to translate a stated
+// number of minutes saved per active committer per month into a dollar
+// value. This is a placeholder — replace with Contoso's real blended
+// engineering cost before using the productivity figures externally.
+const LOADED_HOURLY_RATE_USD = 80;
+
 // Scenario assumption sets. Only the upside discounts equal handout facts
-// (the stated maximums); everything else here is a team assumption.
+// (the stated maximums). Discounts span the full realistic range: the
+// conservative case assumes no discount has been secured at all (the true
+// floor, since nothing beyond the stated maximums is guaranteed), through
+// to the maximum on offer. Productivity/consolidation value is expressed
+// as minutes of engineer time saved per active committer per month, not
+// as a bare dollar figure, so the claim behind each number is checkable
+// (see Quant-Report.md for the reasoning behind each figure).
 const SCENARIOS = Object.freeze({
   conservative: Object.freeze({
     label: 'Conservative',
-    gheDiscount: 0.10,
-    ghasDiscount: 0.05,
-    migrationHoursPerRepo: 2.0,
-    valuePerCommitterMonth: 0, // no credited productivity/consolidation value
+    gheDiscount: 0.00, // no discount secured — a genuine floor, not a guess
+    ghasDiscount: 0.00,
+    migrationHoursPerRepo: 3.0, // limited automation reuse, cautious effort
+    minutesSavedPerCommitterMonth: 0, // no credited value: redundant with existing tooling
   }),
   base: Object.freeze({
     label: 'Base',
-    gheDiscount: 0.20,
-    ghasDiscount: 0.12,
-    migrationHoursPerRepo: 1.0,
-    valuePerCommitterMonth: 20,
+    gheDiscount: 0.15,
+    ghasDiscount: 0.08,
+    migrationHoursPerRepo: 1.5,
+    minutesSavedPerCommitterMonth: 15, // ~2 minutes saved per working day
   }),
   upside: Object.freeze({
     label: 'Upside',
     gheDiscount: FACTS.maxGheDiscount,
     ghasDiscount: FACTS.maxGhasDiscount,
-    migrationHoursPerRepo: 0.5,
-    valuePerCommitterMonth: 50,
+    migrationHoursPerRepo: 0.75, // high automation reuse, best-case effort
+    minutesSavedPerCommitterMonth: 45, // ~2 minutes saved per working day, doubled
   }),
 });
+
+/** Dollar value per active committer per month implied by a scenario's stated time saving. */
+function valuePerCommitterMonth(scenarioKey) {
+  const s = SCENARIOS[scenarioKey];
+  return (s.minutesSavedPerCommitterMonth / 60) * LOADED_HOURLY_RATE_USD;
+}
 
 /** Current-state annual Azure DevOps licence cost for the given user count. */
 function adoAnnualCost(users) {
@@ -85,14 +103,17 @@ function incrementalAnnualCost(users, scenarioKey) {
 
 /** Annual productivity/consolidation value credited to active committers. */
 function productivityValueAnnual(users, scenarioKey) {
-  const s = SCENARIOS[scenarioKey];
-  return users * FACTS.activeCommitterRatio * s.valuePerCommitterMonth * 12;
+  return users * FACTS.activeCommitterRatio * valuePerCommitterMonth(scenarioKey) * 12;
 }
 
-/** One-off migration cost (repo count is independent of the user-count input). */
-function migrationCostUsd(scenarioKey) {
+/**
+ * One-off migration cost. Defaults to the full ~3,000-repository estate,
+ * but accepts an explicit repository count so the same formula can price
+ * a smaller, bounded pilot without duplicating the calculation.
+ */
+function migrationCostUsd(scenarioKey, repoCount = FACTS.repoCount) {
   const s = SCENARIOS[scenarioKey];
-  const eur = FACTS.repoCount * s.migrationHoursPerRepo * FACTS.partnerRateEurPerHour;
+  const eur = repoCount * s.migrationHoursPerRepo * FACTS.partnerRateEurPerHour;
   return eur * FX_EUR_TO_USD;
 }
 
@@ -133,12 +154,14 @@ function formatUsd(value) {
 const ROIModel = {
   FACTS,
   FX_EUR_TO_USD,
+  LOADED_HOURLY_RATE_USD,
   SCENARIOS,
   adoAnnualCost,
   gheAnnualCost,
   ghasAnnualCost,
   githubAnnualCost,
   incrementalAnnualCost,
+  valuePerCommitterMonth,
   productivityValueAnnual,
   migrationCostUsd,
   netAnnualPosition,
