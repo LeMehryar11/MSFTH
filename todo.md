@@ -6,20 +6,23 @@
 - [x] Write `AGENTS.md`, including the eleven mandated operating rules.
 - [x] Build the Quant's formula module (`roi-model.js`), verified against the handout's exact reference figures.
 - [x] Write and pass the test suite (`roi-model.test.js`, 17 tests, `npm test`).
-- [x] Build the Presenter's interactive calculator (`calculator.html`), verified to render and compute correctly opened directly from disk.
-- [x] Build the Presenter's pitch deck (`pitch-deck.html`), verified across all nine slides.
+- [x] Build the Presenter's interactive calculator (`calculator.html`), with editable migration-effort and engineer-time-saved fields per scenario.
+- [x] Build the Presenter's pitch deck (`pitch-deck.html`), 9 slides.
 - [x] Write `map.md`, `README.md`, `usage.md`, and this file.
-- [x] Recalibrate scenario assumptions after review: conservative discount is a genuine 0% floor (not 10%/5%); productivity value is derived transparently from an explicit loaded-hourly-rate × minutes-saved basis, not an invented dollar figure.
-- [x] Fix the recommendation logic so it is consistent with the model: since no scenario pays back a full migration within 5 years, the recommendation is a small, bounded pilot, not a full migration — reasoning made explicit throughout the deck and `ROI-Model.md`.
-- [x] Add an explicit "existing tooling" treatment (Nexus, BlackDuck, SonarQube) to the deck and `ROI-Model.md`.
 - [x] Write `Sceptic-Report.md`, `Advocate-Report.md`, `Neutral-Report.md`, `Quant-Report.md`.
+- [x] Recalibrate per Contoso's confirmation that maximum discounts apply in every scenario — discount is no longer a source of variation between scenarios.
+- [x] Recalibrate migration-effort and engineer-time-saved assumptions using web research (previously ungrounded/too low); both are now cited and directly editable in the calculator.
+- [x] Add tool-retirement modelling (BlackDuck/SonarQube/Nexus) matching the team-supplied scenario table, using researched industry-typical pricing.
+- [x] Fix a cross-file inconsistency: the deck and calculator previously used different reference employee counts (750 vs 500), producing different payback months for the same scenario. Both now use 500 users and agree exactly.
+- [x] Add the GHAS-features-port-to-Azure-DevOps-within-6-months risk to the reasoning throughout.
+- [x] Verify the calculator's and deck's rendered output with headless-DOM (`jsdom`) functional tests instead of screenshots (32 assertions total, all passing).
 
 ## Outstanding — requires Contoso input before finalising the business case
 - [ ] Confirm the firm user-count commitment (500 vs. 1,000).
-- [ ] Confirm the discount tiers Microsoft actually agrees for GHE and GHAS.
-- [ ] Obtain Contoso's current BlackDuck, SonarQube and Nexus licence spend, to value any retirement.
+- [ ] Obtain a real migration-effort estimate per repository from the preferred partner — this is now the single biggest swing factor in absolute dollar terms.
+- [ ] Obtain Contoso's current BlackDuck, SonarQube and Nexus licence spend, to replace the researched placeholder pricing with real figures.
+- [ ] Confirm whether GitHub's Advanced-Security-equivalent features really do reach Azure DevOps within roughly 6 months — this materially affects whether retiring existing tools (Base/Upside) is wise.
 - [ ] Confirm the real EUR/USD basis for combining migration cost with licence cost (currently modelled at an illustrative 1:1 rate).
-- [ ] Obtain a real migration-effort estimate per repository from the preferred partner.
 - [ ] Confirm whether Contoso will take Microsoft's Unified Support, and its cost.
 - [ ] Confirm Contoso's real blended/loaded engineering cost, to replace the $80/hour placeholder behind the productivity-value figures.
 
